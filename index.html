@@ -1,903 +1,1039 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-  <meta name="theme-color" content="#07090b" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>REP — Earn Your Screen Time</title>
-  <meta name="version" content="REP FINAL 1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>REP</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+<style>
+*{box-sizing:border-box}
 
-  <style>
-:root{
-  --bg:#07090b;--panel:rgba(17,20,23,.82);--line:rgba(255,255,255,.10);
-  --text:#f5f7f5;--muted:#89918c;--lime:#62c554;--lime2:#9ff22d;
-  --red:#ff625f;--blue:#7dd8ff;--radius:22px;
-  --safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom)
+body{
+    margin:0;
+    background:#080a09;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    overflow-x:hidden;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
-body{overflow:hidden}
-button,input{font:inherit}button{color:inherit}
-.app{min-height:100dvh;background:var(--bg)}
-.view{display:none;min-height:100dvh}.view.active{display:block}
 
-/* ONBOARDING */
-#onboarding{padding:calc(28px + var(--safe-top)) 22px calc(24px + var(--safe-bottom));
-align-items:center;justify-content:center}
-#onboarding.active{display:flex}
-.onboard{width:min(100%,420px)}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:70px}
-.brand-mark{width:36px;height:36px;border:1px solid rgba(98,197,84,.6);border-radius:11px;position:relative}
-.brand-mark:before{content:"";position:absolute;left:8px;right:8px;top:17px;height:2px;background:var(--lime)}
-.brand-mark:after{content:"";position:absolute;top:8px;bottom:8px;left:17px;width:2px;background:var(--lime)}
-.brand-name{font-size:17px;font-weight:800;letter-spacing:.1em}
-.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);
-font-weight:800;margin-bottom:13px}
-.hero-title{font-size:clamp(39px,11vw,64px);line-height:.94;letter-spacing:-.055em;margin:0}
-.hero-subtitle{color:var(--muted);font-size:15px;line-height:1.5;margin:20px 0 30px}
-.field{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
-.field label{display:block;color:var(--muted);font-size:10px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px}
-.field input{width:100%;border:0;outline:0;background:none;color:var(--text);font-size:17px}
-.primary{width:100%;border:0;border-radius:16px;padding:16px 18px;margin-top:10px;background:var(--lime);
-color:#081006;font-weight:800;font-size:14px;cursor:pointer}
+.app{
+    width:min(100%,900px);
+    margin:auto;
+    padding:22px 18px 40px;
+}
 
-/* HOME */
-#home{overflow:auto;padding-bottom:30px}
-.topbar{padding:calc(17px + var(--safe-top)) 18px 10px;max-width:720px;margin:auto;
-display:flex;justify-content:space-between;align-items:center}
-.greeting{font-size:11px;color:var(--muted);margin-bottom:3px}.username{font-size:20px;font-weight:780}
-.profile-button{width:40px;height:40px;border-radius:13px;border:1px solid var(--line);
-background:rgba(255,255,255,.035);display:grid;place-items:center}
-.profile-button span{width:15px;height:15px;border:1px solid #9aa39e;border-radius:50%;position:relative}
-.profile-button span:after{content:"";position:absolute;left:-5px;right:-5px;bottom:-9px;height:7px;
-border:1px solid #9aa39e;border-bottom:0;border-radius:9px 9px 0 0}
-.content{width:min(100%,720px);margin:auto;padding:7px 18px 30px}
-.balance-card{border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.035);padding:20px}
-.card-label{font-size:10px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase}
-.balance{font-size:clamp(49px,14vw,70px);line-height:1;letter-spacing:-.065em;font-weight:820;margin:10px 0 6px;font-variant-numeric:tabular-nums}
-.balance span{color:var(--lime)}.balance-note{font-size:11px;color:#6f7873}
-.section-title{margin:24px 1px 10px;font-size:12px;font-weight:750;color:#cbd0cd}
-.exercise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.exercise{min-height:118px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025);
-padding:14px;text-align:left;position:relative;cursor:pointer}
-.exercise.selected{border-color:rgba(98,197,84,.62);background:rgba(98,197,84,.065)}
-.exercise-line{position:absolute;right:14px;top:14px;width:7px;height:7px;border-radius:50%;border:1px solid #56605a}
-.exercise.selected .exercise-line{background:var(--lime);border-color:var(--lime)}
-.exercise-icon{width:34px;height:34px;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;margin-bottom:17px}
-.exercise-icon svg{width:20px;height:20px}.exercise-name{font-size:14px;font-weight:760}
-.exercise-meta{font-size:9px;color:var(--muted);margin-top:4px}
-.start-button{width:100%;min-height:55px;margin-top:10px;border-radius:16px;border:1px solid rgba(98,197,84,.32);
-background:rgba(98,197,84,.08);color:var(--lime);font-weight:800}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat{border:1px solid var(--line);border-radius:15px;padding:12px;background:rgba(255,255,255,.022)}
-.stat-value{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}.stat-label{font-size:9px;color:var(--muted);
-margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+}
 
-/* WORKOUT CAMERA */
-#workout{background:#000}.workout{position:fixed;inset:0;overflow:hidden;background:#000}
-#video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);z-index:1}
-#poseCanvas{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1);pointer-events:none;z-index:4}
-.camera-shade{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.48),transparent 28%,transparent 67%,rgba(0,0,0,.65))}
-.workout-top{position:absolute;z-index:7;top:calc(15px + var(--safe-top));left:15px;right:15px;display:flex;justify-content:space-between;align-items:center}
-.glass{border:1px solid rgba(255,255,255,.13);background:rgba(6,8,10,.48);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.close{width:43px;height:43px;border-radius:14px;border:0;position:relative}
-.close:before,.close:after{content:"";position:absolute;width:18px;height:1.5px;left:12px;top:21px;background:#fff}
-.close:before{transform:rotate(45deg)}.close:after{transform:rotate(-45deg)}
-.workout-mode{padding:10px 14px;border-radius:14px;text-align:center}
-.workout-mode .small{font-size:9px;color:#8e9691;letter-spacing:.12em;text-transform:uppercase}
-.mode-name{font-size:13px;font-weight:760;margin-top:3px}
-.camera-status{position:absolute;z-index:8;top:calc(73px + var(--safe-top));left:50%;transform:translateX(-50%);
-padding:7px 11px;border-radius:999px;color:#adb5b0;font-size:9px;white-space:nowrap}
-.camera-status.live{color:var(--lime);border-color:rgba(98,197,84,.25)}
-.rep-hud{position:absolute;z-index:7;left:50%;top:50%;transform:translate(-50%,-50%);
-text-align:center;pointer-events:none}
-.rep-number{font-size:clamp(82px,24vw,150px);line-height:.85;letter-spacing:-.08em;font-weight:850;
-font-variant-numeric:tabular-nums;opacity:0;transform:translateY(8px) scale(.92);
-text-shadow:0 8px 35px rgba(0,0,0,.5);transition:opacity .18s,transform .22s}
-.rep-number.pop{opacity:1;transform:translateY(0) scale(1)}
-.rep-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.72);
-margin-top:12px;opacity:0;transition:opacity .18s}.rep-label.pop{opacity:1}
-.bottom-hud{position:absolute;z-index:6;left:14px;right:14px;bottom:calc(14px + var(--safe-bottom));
-display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
-.hud-box{min-width:92px;padding:10px 12px;border-radius:14px}.hud-label{font-size:8px;color:#8d9691;letter-spacing:.11em;text-transform:uppercase}
-.hud-value{font-size:15px;font-weight:760;margin-top:4px;font-variant-numeric:tabular-nums}
-.finish{width:56px;height:56px;border-radius:18px;border:1px solid rgba(255,255,255,.16);background:rgba(5,7,8,.55);
-display:grid;place-items:center}.finish span{width:17px;height:17px;border:1px solid #fff}
+.logo{
+    font-size:28px;
+    font-weight:800;
+    letter-spacing:-1px;
+}
 
-/* BOXING */
-.box-target{position:absolute;z-index:7;width:76px;height:76px;border-radius:50%;border:3px solid var(--lime);
-box-shadow:0 0 0 7px rgba(98,197,84,.08),0 0 35px rgba(98,197,84,.24);
-display:grid;place-items:center;pointer-events:none;transition:transform .12s,opacity .12s}
-.box-target:before{content:"";width:22px;height:22px;border:1px solid rgba(255,255,255,.75);border-radius:50%}
-.box-target.hit{transform:scale(1.65);opacity:0;border-color:#fff}
-.box-score{position:absolute;z-index:7;top:calc(76px + var(--safe-top));right:17px;color:#fff;font-size:14px;font-weight:800}
-.box-score span{color:var(--lime);margin-left:5px}
-.box-round{position:absolute;z-index:7;top:calc(76px + var(--safe-top));left:17px;color:#aeb6b1;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
-.box-message{position:absolute;z-index:8;left:50%;top:42%;transform:translate(-50%,-50%);
-font-size:32px;font-weight:850;letter-spacing:-.04em;opacity:0;pointer-events:none}
-.box-message.show{animation:boxPop .55s ease forwards}
-@keyframes boxPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:0;transform:translate(-50%,-65%) scale(1)}}
+.balance{
+    background:#111713;
+    border:1px solid #202a22;
+    border-radius:14px;
+    padding:10px 15px;
+    color:#62c554;
+    font-weight:700;
+}
 
-/* SHEET */
-.modal{position:fixed;inset:0;z-index:20;display:none;align-items:flex-end;background:rgba(0,0,0,.55);backdrop-filter:blur(7px)}
-.modal.show{display:flex}.sheet{width:100%;max-width:720px;margin:auto;background:#0d1013;border:1px solid var(--line);
-border-bottom:0;border-radius:25px 25px 0 0;padding:17px 18px calc(22px + var(--safe-bottom))}
-.grab{width:38px;height:4px;border-radius:99px;background:#3e4541;margin:0 auto 21px}.sheet h2{font-size:23px;margin:0 0 17px}
-.secondary{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:15px;padding:14px;margin-top:9px}
-.danger{color:#ff8a8a}.toast{position:fixed;z-index:50;left:50%;bottom:calc(83px + var(--safe-bottom));
-transform:translate(-50%,20px);opacity:0;background:#f1f5f2;color:#0a0d0b;padding:10px 14px;border-radius:11px;font-size:11px;font-weight:750;
-transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:translate(-50%,0);opacity:1}
-@media(max-width:480px){.exercise-grid{grid-template-columns:1fr 1fr}.exercise:last-child{grid-column:1/-1;min-height:92px}.exercise:last-child .exercise-icon{margin-bottom:10px}}
+.subtitle{
+    color:#777;
+    margin-top:-15px;
+    margin-bottom:22px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.card{
+    background:#101311;
+    border:1px solid #202521;
+    border-radius:18px;
+    padding:18px 12px;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.card.active{
+    border-color:#62c554;
+    box-shadow:0 0 0 1px #62c554;
+}
+
+.card:hover{
+    transform:translateY(-2px);
+}
+
+.card-title{
+    font-size:17px;
+    font-weight:700;
+}
+
+.card-time{
+    margin-top:7px;
+    color:#62c554;
+    font-size:13px;
+}
+
+.camera{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    background:#050505;
+    border-radius:22px;
+    overflow:hidden;
+    border:1px solid #202521;
+}
+
+video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transform:scaleX(-1);
+}
+
+#canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    transform:scaleX(-1);
+    pointer-events:none;
+    z-index:5;
+}
+
+.camera-message{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#777;
+    z-index:2;
+}
+
+.controls{
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+}
+
+button{
+    flex:1;
+    border:0;
+    border-radius:15px;
+    padding:15px;
+    color:#fff;
+    background:#62c554;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+button.secondary{
+    background:#171b18;
+    border:1px solid #272d29;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+.status{
+    text-align:center;
+    min-height:25px;
+    margin-top:13px;
+    color:#888;
+}
+
+.rep{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%) scale(.7);
+    font-size:100px;
+    font-weight:900;
+    color:#62c554;
+    opacity:0;
+    pointer-events:none;
+    z-index:10;
+}
+
+.rep.show{
+    animation:repPop .9s ease forwards;
+}
+
+@keyframes repPop{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}
+    20%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    70%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.08)}
+}
+
+.counter{
+    text-align:center;
+    font-size:68px;
+    font-weight:900;
+    margin-top:14px;
+}
+
+.profile{
+    margin-top:25px;
+    padding:18px;
+    background:#101311;
+    border:1px solid #202521;
+    border-radius:18px;
+}
+
+.profile-title{
+    color:#777;
+    font-size:13px;
+    margin-bottom:5px;
+}
+
+.profile-name{
+    font-size:21px;
+    font-weight:700;
+}
+
+@media(max-width:600px){
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .counter{
+        font-size:55px;
+    }
+}
 </style>
-<style>button, .exercise, .primary { user-select:none; } video { background:#000; }</style>
 </head>
 
 <body>
+
 <div class="app">
 
-  <!-- ONBOARDING -->
-  <section id="onboarding" class="view active">
-    <div class="onboard">
-      <div class="brand">
-        <div class="brand-mark"></div>
-        <div class="brand-name">REP</div>
-      </div>
-
-      <div class="eyebrow">Earn your screen time</div>
-      <h1 class="hero-title">Твоё время<br>зависит от тебя.</h1>
-      <p class="hero-subtitle">
-        Выполняй упражнения, зарабатывай минуты и контролируй своё экранное время.
-      </p>
-
-      <div class="field">
-        <label for="nameInput">Как к тебе обращаться</label>
-        <input id="nameInput" maxlength="24" autocomplete="name" placeholder="Например, Матвей" />
-      </div>
-      <button id="continueBtn" class="primary">Продолжить</button>
-    </div>
-  </section>
-
-  <!-- HOME -->
-  <section id="home" class="view">
-    <header class="topbar">
-      <div class="top-left">
-        <div class="greeting">Добро пожаловать</div>
-        <div id="username" class="username">Пользователь</div>
-      </div>
-      <button id="profileBtn" class="profile-button" aria-label="Профиль"><span></span></button>
-    </header>
-
-    <main class="content">
-      <section class="balance-card">
-        <div class="card-label">Доступное время</div>
-        <div id="balance" class="balance">00<span>:00</span></div>
-        <div class="balance-note">1 повтор = 1 минута экранного времени</div>
-      </section>
-
-      <div class="section-title">Выбери упражнение</div>
-
-      <div class="exercise-grid">
-        <button class="exercise selected" data-exercise="pushup">
-          <div class="exercise-line"></div>
-          <div class="exercise-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M4 16.5h16M6.5 16.5l1.8-5.4c.35-1.05 1.25-1.76 2.36-1.84l2.2-.16c1.2-.09 2.31.58 2.78 1.69l1.1 2.61"/>
-              <path d="M8.2 11.1 6.3 9.2M17.8 13.4l1.5 1.5"/>
-            </svg>
-          </div>
-          <div class="exercise-name">Отжимания</div>
-          <div class="exercise-meta">Верхняя часть тела</div>
-        </button>
-
-        <button class="exercise" data-exercise="squat">
-          <div class="exercise-line"></div>
-          <div class="exercise-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="5" r="2.2"/>
-              <path d="M9.5 8.5 8 13l-3.5 3.5M14.5 8.5 16 13l3.5 3.5M8 13l4 2 4-2M12 15v5M8.2 20h7.6"/>
-            </svg>
-          </div>
-          <div class="exercise-name">Приседания</div>
-          <div class="exercise-meta">Нижняя часть тела</div>
-        </button>
-        <button class="exercise" data-exercise="boxing">
-          <div class="exercise-line"></div>
-          <div class="exercise-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 17.5 10.5 12 8 9.5l2-2 3 3 2.5-2.5 3 3-2.5 2.5 3 3-2 2-3-3-5.5 5.5z"/>
-            </svg>
-          </div>
-          <div class="exercise-name">BOX</div>
-          <div class="exercise-meta">Реакция и точность</div>
-        </button>
-      </div>
-
-      <button id="startBtn" class="start-button">Начать тренировку</button>
-
-      <div class="section-title">Сегодня</div>
-      <div class="stats-grid">
-        <div class="stat"><div id="todayReps" class="stat-value">0</div><div class="stat-label">Повторов</div></div>
-        <div class="stat"><div id="todayMinutes" class="stat-value">0</div><div class="stat-label">Минут</div></div>
-        <div class="stat"><div id="streak" class="stat-value">1</div><div class="stat-label">Серия</div></div>
-      </div>
-    </main>
-  </section>
-
-  <!-- WORKOUT -->
-  <section id="workout" class="view">
-    <div class="workout">
-      <video id="video" playsinline muted></video>
-      <canvas id="poseCanvas"></canvas>
-      <div class="camera-shade"></div>
-      <div id="boxGrid" class="box-grid" style="display:none"></div>
-      <div id="boxRound" class="box-round" style="display:none">REACTION ROUND</div>
-      <div id="boxScore" class="box-score" style="display:none">SCORE <span>0</span></div>
-      <div id="boxMessage" class="box-message"></div>
-
-      <div class="workout-top">
-        <button id="closeWorkout" class="close glass" aria-label="Закрыть"></button>
-        <div class="workout-mode glass">
-          <div class="small">Режим</div>
-          <div id="workoutModeName" class="mode-name">Отжимания</div>
+    <div class="header">
+        <div class="logo">REP</div>
+        <div class="balance">
+            <span id="balance">0</span> мин
         </div>
-      </div>
-
-      <div id="cameraStatus" class="camera-status glass">Подготовка камеры</div>
-
-      <div class="rep-hud">
-        <div id="repNumber" class="rep-number">0</div>
-        <div id="repLabel" class="rep-label">повторов</div>
-      </div>
-
-      <div class="bottom-hud">
-        <div class="hud-box glass">
-          <div class="hud-label">Заработано</div>
-          <div id="earnedNow" class="hud-value">+00:00</div>
-        </div>
-        <div class="hud-box glass">
-          <div class="hud-label">Баланс</div>
-          <div id="workoutBalance" class="hud-value">00:00</div>
-        </div>
-        <button id="finishWorkout" class="finish" aria-label="Завершить"><span></span></button>
-      </div>
     </div>
-  </section>
 
-  <!-- PROFILE -->
-  <div id="profileModal" class="modal">
-    <div class="sheet">
-      <div class="grab"></div>
-      <h2>Профиль</h2>
-      <div class="field">
-        <label for="profileName">Имя</label>
-        <input id="profileName" maxlength="24" />
-      </div>
-      <button id="saveProfile" class="primary">Сохранить</button>
-      <button id="resetData" class="secondary danger">Сбросить данные</button>
-      <button id="closeProfile" class="secondary">Закрыть</button>
+    <div class="subtitle">
+        Earn Your Screen Time
     </div>
-  </div>
 
-  <div id="toast" class="toast"></div>
+    <div class="cards">
+
+        <div class="card active" id="pushupCard" onclick="selectExercise('pushup')">
+            <div class="card-title">Отжимания</div>
+            <div class="card-time">+1 мин / повтор</div>
+        </div>
+
+        <div class="card" id="squatCard" onclick="selectExercise('squat')">
+            <div class="card-title">Приседания</div>
+            <div class="card-time">+1 мин / повтор</div>
+        </div>
+
+        <div class="card" id="boxingCard" onclick="selectExercise('boxing')">
+            <div class="card-title">BOX</div>
+            <div class="card-time">Реакция</div>
+        </div>
+
+    </div>
+
+    <div class="camera">
+
+        <video id="video" autoplay muted playsinline></video>
+
+        <canvas id="canvas"></canvas>
+
+        <div class="camera-message" id="cameraMessage">
+            Нажми «Запустить»
+        </div>
+
+        <div class="rep" id="repAnimation">+1</div>
+
+    </div>
+
+    <div class="counter" id="counter">0</div>
+
+    <div class="status" id="status">
+        Камера не запущена
+    </div>
+
+    <div class="controls">
+        <button onclick="startCamera()">Запустить</button>
+        <button class="secondary" onclick="resetCounter()">Сброс</button>
+    </div>
+
+    <div class="profile">
+        <div class="profile-title">Профиль</div>
+        <div class="profile-name" id="profileName">REP User</div>
+    </div>
+
 </div>
 
+
+<!-- MediaPipe Pose -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
 <script>
-  const STORAGE_KEY = "rep_app_v2";
-
-  const defaultData = {
-    name: "",
-    balanceSeconds: 0,
-    todayReps: 0,
-    todayMinutes: 0,
-    streak: 1,
-    lastDate: new Date().toISOString().slice(0,10),
-    selectedExercise: "pushup",
-    boxingBest: 0
-  };
-
-  let data = loadData();
-  let selectedExercise = data.selectedExercise || "pushup";
-  let workoutReps = 0;
-  let workoutRunning = false;
-  let stream = null;
-  let pose = null;
-  let animationFrame = null;
-  let lastRepTime = 0;
-  let pushupState = "up";
-  let squatState = "up";
-  let lastPoseSeen = 0;
-  let boxTarget = null;
-  let boxScore = 0;
-  let boxHits = 0;
-  let boxSpawnTimer = null;
-  let boxActive = false;
-  let hands = null;
-  let lastHandFrame = 0;
-  let lastHitAt = 0;
-
-  const $ = (id) => document.getElementById(id);
-
-  function loadData() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return { ...defaultData, ...(saved || {}) };
-    } catch { return { ...defaultData }; }
-  }
-
-  function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
-
-  function formatTime(seconds) {
-    seconds = Math.max(0, Math.floor(seconds));
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    if (h > 0) return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-    return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  }
-
-  function showView(id) {
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-    $(id).classList.add("active");
-  }
-
-  function renderHome() {
-    $("username").textContent = data.name || "Пользователь";
-    $("balance").innerHTML = formatTime(data.balanceSeconds).replace(":", "<span>:</span>");
-    $("todayReps").textContent = data.todayReps;
-    $("todayMinutes").textContent = data.todayMinutes;
-    $("streak").textContent = data.streak;
-
-    document.querySelectorAll(".exercise").forEach(btn => {
-      btn.classList.toggle("selected", btn.dataset.exercise === selectedExercise);
-    });
-    $("startBtn").textContent =
-      selectedExercise === "pushup" ? "Начать отжимания" :
-      selectedExercise === "squat" ? "Начать приседания" :
-      "Начать BOX";
-  }
-
-  function toast(message) {
-    const t = $("toast");
-    t.textContent = message;
-    t.classList.add("show");
-    clearTimeout(window.__toastTimer);
-    window.__toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
-  }
-
-  function todayCheck() {
-    const today = new Date().toISOString().slice(0,10);
-    if (data.lastDate !== today) {
-      data.todayReps = 0;
-      data.todayMinutes = 0;
-      data.lastDate = today;
-      data.streak = Math.max(1, data.streak);
-      saveData();
-    }
-  }
-
-  function angle(a,b,c) {
-    const ab = {x:a.x-b.x, y:a.y-b.y};
-    const cb = {x:c.x-b.x, y:c.y-b.y};
-    const dot = ab.x*cb.x + ab.y*cb.y;
-    const mag = Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y);
-    if (!mag) return 180;
-    return Math.acos(Math.max(-1,Math.min(1,dot/mag))) * 180 / Math.PI;
-  }
-
-  function avg(a,b) { return (a+b)/2; }
-
-  function processPose(results) {
-    if (!results.poseLandmarks) return;
-
-    lastPoseSeen = performance.now();
-
-    const p = results.poseLandmarks;
-    const L = (i) => p[i];
-
-    if (selectedExercise === "boxing") {
-      return;
-    }
-
-    /*
-      PUSH-UP ENGINE — adapted from the user's known-working version.
-
-      11 = left shoulder
-      12 = right shoulder
-      13 = left elbow
-      14 = right elbow
-      15 = left wrist
-      16 = right wrist
-    */
-    if (selectedExercise === "pushup") {
-      const leftShoulder = L(11);
-      const rightShoulder = L(12);
-      const leftElbow = L(13);
-      const rightElbow = L(14);
-      const leftWrist = L(15);
-      const rightWrist = L(16);
-
-      const visible =
-        leftShoulder && rightShoulder &&
-        leftElbow && rightElbow &&
-        leftWrist && rightWrist &&
-        (leftShoulder.visibility ?? 1) > 0.5 &&
-        (rightShoulder.visibility ?? 1) > 0.5 &&
-        (leftElbow.visibility ?? 1) > 0.5 &&
-        (rightElbow.visibility ?? 1) > 0.5 &&
-        (leftWrist.visibility ?? 1) > 0.5 &&
-        (rightWrist.visibility ?? 1) > 0.5;
-
-      if (!visible) {
-        return;
-      }
-
-      const leftAngle = angle(
-        leftShoulder,
-        leftElbow,
-        leftWrist
-      );
-
-      const rightAngle = angle(
-        rightShoulder,
-        rightElbow,
-        rightWrist
-      );
-
-      const elbowAngle =
-        (leftAngle + rightAngle) / 2;
-
-      /*
-        The important part of the original working algorithm:
-
-        < 105°  = DOWN
-        > 150°  = UP
-        DOWN -> UP = one repetition
-      */
-      if (elbowAngle > 150) {
-        if (pushupState === "down") {
-          registerRep();
-          pushupState = "up";
-        }
-      } else if (elbowAngle < 105) {
-        pushupState = "down";
-      }
-    }
-
-    /*
-      SQUAT ENGINE stays separate so the proven push-up logic
-      does not affect the other exercise.
-    */
-    else if (selectedExercise === "squat") {
-      const visible = [23,24,25,26,27,28].every(
-        i => L(i) && (L(i).visibility ?? 1) > 0.5
-      );
-
-      if (!visible) return;
-
-      const leftKnee = angle(L(23), L(25), L(27));
-      const rightKnee = angle(L(24), L(26), L(28));
-      const knees = avg(leftKnee, rightKnee);
-
-      if (knees < 105) {
-        squatState = "down";
-      } else if (knees > 155 && squatState === "down") {
-        registerRep();
-        squatState = "up";
-      }
-    }
-  }
-
-  function registerRep() {
-    const now = performance.now();
-    if (now - lastRepTime < 650) return;
-    lastRepTime = now;
-
-    workoutReps++;
-    data.balanceSeconds += 60;
-    data.todayReps++;
-    data.todayMinutes = Math.floor(data.balanceSeconds / 60);
-    saveData();
-
-    $("repNumber").textContent = workoutReps;
-    $("repNumber").classList.add("pop");
-    $("repLabel").classList.add("pop");
-    clearTimeout(window.__repFade);
-    window.__repFade = setTimeout(() => {
-      $("repNumber").classList.remove("pop");
-      $("repLabel").classList.remove("pop");
-    }, 900);
-    $("earnedNow").textContent = "+" + formatTime(workoutReps * 60);
-    $("workoutBalance").textContent = formatTime(data.balanceSeconds);
-  }
-
-
-  function spawnBoxTarget() {
-    if (!boxActive) return;
-    const old = document.querySelector(".box-target");
-    if (old) old.remove();
-
-    const target = document.createElement("div");
-    target.className = "box-target";
-
-    const marginX = Math.max(72, innerWidth * .10);
-    const marginY = Math.max(135, innerHeight * .15);
-    const x = marginX + Math.random() * Math.max(20, innerWidth - marginX * 2 - 84);
-    const y = marginY + Math.random() * Math.max(20, innerHeight - marginY * 2 - 84);
-
-    target.style.left = `${x}px`;
-    target.style.top = `${y}px`;
-    $("workout").querySelector(".workout").appendChild(target);
-    boxTarget = {el: target, x: x + 42, y: y + 42};
-  }
-
-  function handleBoxHands(results) {
-    if (!boxActive || !boxTarget || !results.multiHandLandmarks) return;
-
-    const now = performance.now();
-    if (now - lastHitAt < 420) return;
-
-    for (const hand of results.multiHandLandmarks) {
-      // Index fingertip (8) + wrist (0). The fingertip gives much more
-      // useful aiming precision than the Pose wrist landmark.
-      const tip = hand[8];
-      if (!tip) continue;
-
-      // Camera preview is mirrored, so x is inverted for the screen.
-      const x = innerWidth * (1 - tip.x);
-      const y = innerHeight * tip.y;
-      const distance = Math.hypot(x - boxTarget.x, y - boxTarget.y);
-
-      if (distance < 68) {
-        lastHitAt = now;
-        boxHits++;
-        boxScore += 100 + Math.min(100, boxHits * 2);
-
-        const target = boxTarget.el;
-        target.classList.add("hit");
-        $("boxScore").querySelector("span").textContent = boxScore;
-
-        const msg = $("boxMessage");
-        msg.textContent = boxHits % 5 === 0 ? "COMBO" : "+100";
-        msg.classList.remove("show");
-        void msg.offsetWidth;
-        msg.classList.add("show");
-
-        setTimeout(() => target.remove(), 120);
-        boxTarget = null;
-
-        setTimeout(spawnBoxTarget, 180);
-        break;
-      }
-    }
-  }
-
-  async function initHands() {
-    if (hands) return true;
-    if (typeof Hands === "undefined") return false;
-
-    hands = new Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-    });
-
-    hands.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 1,
-      minDetectionConfidence: .55,
-      minTrackingConfidence: .55
-    });
-
-    hands.onResults(handleBoxHands);
-    return true;
-  }
-
-  async function handLoop() {
-    if (!boxActive || !hands || !$("video").srcObject) return;
-
-    const now = performance.now();
-    if (now - lastHandFrame > 55 && $("video").readyState >= 2) {
-      lastHandFrame = now;
-      try { await hands.send({image: $("video")}); } catch (e) {}
-    }
-    if (boxActive) requestAnimationFrame(handLoop);
-  }
-
-  async function startBoxMode() {
-    boxActive = true;
-    boxScore = 0;
-    boxHits = 0;
-    lastHitAt = 0;
-
-    $("boxScore").querySelector("span").textContent = "0";
-    $("boxRound").style.display = "block";
-    $("boxScore").style.display = "block";
-    $("boxGrid").style.display = "block";
-
-    let ready = await initHands();
-    if (!ready) {
-      await new Promise(r => setTimeout(r, 900));
-      ready = await initHands();
-    }
-    if (!ready) {
-      $("boxRound").textContent = "HAND TRACKING UNAVAILABLE";
-      toast("Трекинг рук не загрузился");
-    } else {
-      $("boxRound").textContent = "REACTION ROUND";
-      handLoop();
-    }
-
-    spawnBoxTarget();
-
-    boxSpawnTimer = setInterval(() => {
-      if (boxActive && !boxTarget) spawnBoxTarget();
-    }, 1300);
-  }
-
-  function stopBoxMode() {
-    boxActive = false;
-    clearInterval(boxSpawnTimer);
-    boxSpawnTimer = null;
-
-    const target = document.querySelector(".box-target");
-    if (target) target.remove();
-
-    boxTarget = null;
-    $("boxRound").style.display = "none";
-    $("boxScore").style.display = "none";
-    $("boxGrid").style.display = "none";
-  }
-
-  async function startCamera() {
-    $("cameraStatus").textContent = "Запрашиваем доступ к камере";
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: {ideal:1280}, height:{ideal:720} },
-        audio: false
-      });
-      $("video").srcObject = stream;
-
-      if ($("video").readyState < 1) {
-        await new Promise(resolve => {
-          const done = () => { $("video").removeEventListener("loadedmetadata", done); resolve(); };
-          $("video").addEventListener("loadedmetadata", done);
-          setTimeout(done, 2500);
-        });
-      }
-
-      await $("video").play();
-
-      const canvas = $("poseCanvas");
-      canvas.width = $("video").videoWidth || 1280;
-      canvas.height = $("video").videoHeight || 720;
-
-      if (!pose) {
-        pose = new Pose({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-        });
-        pose.setOptions({
-          modelComplexity: 1,
-          smoothLandmarks: true,
-          enableSegmentation: false,
-          minDetectionConfidence: .5,
-          minTrackingConfidence: .5
-        });
-        pose.onResults(drawResults);
-      }
-
-      $("cameraStatus").textContent = "Камера активна";
-      $("cameraStatus").classList.add("live");
-      loopPose();
-    } catch (err) {
-      console.error(err);
-      $("cameraStatus").textContent = "Нет доступа к камере";
-      toast("Разреши доступ к камере и попробуй снова");
-    }
-  }
-
-  async function loopPose() {
-    if (!workoutRunning || !pose || !$("video").srcObject) return;
-    if ($("video").readyState >= 2) {
-      try {
-        await pose.send({image: $("video")});
-      } catch(e) {
-        console.warn("Pose frame error:", e);
-      }
-    }
-    animationFrame = requestAnimationFrame(loopPose);
-  }
-
-  // Draw the body skeleton ourselves instead of relying on drawing_utils.
-  // This makes the visible grid deterministic and prevents a missing external
-  // drawing helper from silently removing the skeleton.
-  const SKELETON_CONNECTIONS = [
-    [0,1],[1,2],[2,3],[3,7],
-    [0,4],[4,5],[5,6],[6,8],
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const counterEl = document.getElementById("counter");
+const balanceEl = document.getElementById("balance");
+const statusEl = document.getElementById("status");
+const messageEl = document.getElementById("cameraMessage");
+const repAnimation = document.getElementById("repAnimation");
+
+let counter = 0;
+let balance = Number(localStorage.getItem("repBalance") || 0);
+
+let selectedExercise = "pushup";
+
+let pushupState = "up";
+let squatState = "up";
+
+let cameraStarted = false;
+let lastRepTime = 0;
+
+balanceEl.textContent = balance;
+
+
+/* =========================
+   ПРОФИЛЬ
+========================= */
+
+const savedName = localStorage.getItem("repName");
+
+if(savedName){
+    document.getElementById("profileName").textContent = savedName;
+}
+
+
+/* =========================
+   МАТЕМАТИКА
+========================= */
+
+function distance(a,b){
+
+    return Math.sqrt(
+        (a.x-b.x)**2 +
+        (a.y-b.y)**2
+    );
+
+}
+
+
+function angle(a,b,c){
+
+    const ab = {
+        x:a.x-b.x,
+        y:a.y-b.y
+    };
+
+    const cb = {
+        x:c.x-b.x,
+        y:c.y-b.y
+    };
+
+    const dot =
+        ab.x*cb.x +
+        ab.y*cb.y;
+
+    const magAB =
+        Math.sqrt(
+            ab.x**2 +
+            ab.y**2
+        );
+
+    const magCB =
+        Math.sqrt(
+            cb.x**2 +
+            cb.y**2
+        );
+
+    if(!magAB || !magCB)
+        return 180;
+
+    let cos =
+        dot/(magAB*magCB);
+
+    cos = Math.max(-1,Math.min(1,cos));
+
+    return Math.acos(cos)*180/Math.PI;
+}
+
+
+/* =========================
+   СКЕЛЕТ
+========================= */
+
+/*
+MediaPipe Pose landmarks
+
+0 nose
+
+11 left shoulder
+12 right shoulder
+
+13 left elbow
+14 right elbow
+
+15 left wrist
+16 right wrist
+
+23 left hip
+24 right hip
+
+25 left knee
+26 right knee
+
+27 left ankle
+28 right ankle
+*/
+
+const CONNECTIONS = [
+
+    [0,1],
+    [1,2],
+    [2,3],
+    [3,7],
+
+    [0,4],
+    [4,5],
+    [5,6],
+    [6,8],
+
     [9,10],
-    [11,12],
-    [11,13],[13,15],
-    [12,14],[14,16],
-    [11,23],[12,24],
-    [23,24],
-    [23,25],[25,27],
-    [24,26],[26,28],
-    [27,29],[29,31],
-    [28,30],[30,32]
-  ];
 
-  function drawBodySkeleton(ctx, landmarks, width, height) {
-    ctx.save();
+    [11,12],
+
+    [11,13],
+    [13,15],
+
+    [12,14],
+    [14,16],
+
+    [11,23],
+    [12,24],
+
+    [23,24],
+
+    [23,25],
+    [25,27],
+
+    [24,26],
+    [26,28],
+
+    [27,29],
+    [29,31],
+
+    [28,30],
+    [30,32]
+];
+
+
+function drawSkeleton(points){
+
+    if(!points) return;
+
+    /*
+    ЛИНИИ
+    */
+
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "#62c554";
     ctx.lineWidth = 3.5;
+    ctx.strokeStyle = "#62c554";
 
-    for (const [a,b] of SKELETON_CONNECTIONS) {
-      const p1 = landmarks[a], p2 = landmarks[b];
-      if (!p1 || !p2) continue;
-      if ((p1.visibility ?? 1) < .30 || (p2.visibility ?? 1) < .30) continue;
+    for(const connection of CONNECTIONS){
 
-      ctx.beginPath();
-      ctx.moveTo(p1.x * width, p1.y * height);
-      ctx.lineTo(p2.x * width, p2.y * height);
-      ctx.stroke();
-    }
+        const a = points[connection[0]];
+        const b = points[connection[1]];
 
-    // Clear joint nodes. Hands/feet stay smaller; main body joints are larger.
-    const major = new Set([0,11,12,13,14,23,24,25,26,27,28]);
-    for (let i = 0; i < landmarks.length; i++) {
-      const p = landmarks[i];
-      if (!p || (p.visibility ?? 1) < .40) continue;
+        if(!a || !b) continue;
 
-      const radius = major.has(i) ? 6 : 3;
+        if(
+            (a.visibility ?? 1) < .35 ||
+            (b.visibility ?? 1) < .35
+        ) continue;
 
-      ctx.beginPath();
-      ctx.arc(p.x * width, p.y * height, radius, 0, Math.PI * 2);
-      ctx.fillStyle = "#62c554";
-      ctx.fill();
-
-      if (major.has(i)) {
         ctx.beginPath();
-        ctx.arc(p.x * width, p.y * height, radius + 2.2, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(98,197,84,.28)";
-        ctx.lineWidth = 1.5;
+
+        ctx.moveTo(
+            a.x * canvas.width,
+            a.y * canvas.height
+        );
+
+        ctx.lineTo(
+            b.x * canvas.width,
+            b.y * canvas.height
+        );
+
         ctx.stroke();
-      }
     }
 
-    ctx.restore();
-  }
 
-  function drawResults(results) {
-    const canvas = $("poseCanvas");
-    const video = $("video");
-    const ctx = canvas.getContext("2d");
+    /*
+    ТОЧКИ
+    */
 
-    const width = video.videoWidth || 1280;
-    const height = video.videoHeight || 720;
+    for(let i=0;i<points.length;i++){
 
-    if (canvas.width !== width || canvas.height !== height) {
-      canvas.width = width;
-      canvas.height = height;
+        const p = points[i];
+
+        if(!p) continue;
+
+        if((p.visibility ?? 1) < .35)
+            continue;
+
+        const x = p.x * canvas.width;
+        const y = p.y * canvas.height;
+
+        let radius = 4;
+
+        /*
+        Основные суставы крупнее
+        */
+
+        if([
+            11,12,
+            13,14,
+            15,16,
+            23,24,
+            25,26,
+            27,28
+        ].includes(i)){
+            radius = 6;
+        }
+
+        /*
+        Пальцы/мелкие точки меньше
+        */
+
+        if(i >= 29){
+            radius = 2.5;
+        }
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            radius,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fillStyle =
+            i >= 29
+            ? "#62c554"
+            : "#ffffff";
+
+        ctx.fill();
+    }
+}
+
+
+/* =========================
+   MEDIAPIPE
+========================= */
+
+const pose = new Pose({
+
+    locateFile:(file)=>{
+
+        return `
+        https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}
+        `;
+
     }
 
-    ctx.clearRect(0, 0, width, height);
+});
 
-    if (results.poseLandmarks && results.poseLandmarks.length) {
-      drawBodySkeleton(ctx, results.poseLandmarks, width, height);
-      processPose(results);
-      $("cameraStatus").textContent = "Тело распознано";
-      $("cameraStatus").classList.add("live");
-    } else {
-      $("cameraStatus").textContent = "Ищем человека";
-      $("cameraStatus").classList.remove("live");
+
+pose.setOptions({
+
+    modelComplexity:1,
+
+    smoothLandmarks:true,
+
+    enableSegmentation:false,
+
+    minDetectionConfidence:.5,
+
+    minTrackingConfidence:.5
+
+});
+
+
+pose.onResults(results=>{
+
+    /*
+    Canvas всегда под размер камеры
+    */
+
+    if(video.videoWidth && video.videoHeight){
+
+        if(
+            canvas.width !== video.videoWidth ||
+            canvas.height !== video.videoHeight
+        ){
+
+            canvas.width =
+                video.videoWidth;
+
+            canvas.height =
+                video.videoHeight;
+
+        }
+
     }
-  }
 
-  async function openWorkout() {
-    workoutReps = 0;
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /*
+    ВОТ ЗДЕСЬ РИСУЕТСЯ СКЕЛЕТ
+    */
+
+    if(results.poseLandmarks){
+
+        drawSkeleton(
+            results.poseLandmarks
+        );
+
+        statusEl.textContent =
+            "Тело распознано";
+
+        statusEl.style.color =
+            "#62c554";
+
+        messageEl.style.display =
+            "none";
+
+    }else{
+
+        statusEl.textContent =
+            "Ищем человека";
+
+        statusEl.style.color =
+            "#888";
+
+    }
+
+
+    if(!results.poseLandmarks)
+        return;
+
+
+    const p =
+        results.poseLandmarks;
+
+
+    /* =========================
+       ОТЖИМАНИЯ
+    ========================= */
+
+    if(selectedExercise === "pushup"){
+
+        const leftShoulder = p[11];
+        const rightShoulder = p[12];
+
+        const leftElbow = p[13];
+        const rightElbow = p[14];
+
+        const leftWrist = p[15];
+        const rightWrist = p[16];
+
+
+        const visible =
+
+            leftShoulder.visibility > .5 &&
+            rightShoulder.visibility > .5 &&
+
+            leftElbow.visibility > .5 &&
+            rightElbow.visibility > .5 &&
+
+            leftWrist.visibility > .5 &&
+            rightWrist.visibility > .5;
+
+
+        if(!visible){
+
+            statusEl.textContent =
+                "Встань дальше от камеры";
+
+            return;
+
+        }
+
+
+        const leftAngle =
+            angle(
+                leftShoulder,
+                leftElbow,
+                leftWrist
+            );
+
+
+        const rightAngle =
+            angle(
+                rightShoulder,
+                rightElbow,
+                rightWrist
+            );
+
+
+        const elbowAngle =
+            (leftAngle + rightAngle) / 2;
+
+
+        /*
+        РАБОЧАЯ ЛОГИКА ИЗ ТВОЕГО КОДА
+
+        <105 = вниз
+
+        >150 = вверх
+
+        вниз -> вверх = повтор
+        */
+
+        if(elbowAngle > 150){
+
+            if(pushupState === "down"){
+
+                registerRep();
+
+                pushupState = "up";
+
+            }
+
+        }
+
+        else if(elbowAngle < 105){
+
+            pushupState = "down";
+
+        }
+
+    }
+
+
+    /* =========================
+       ПРИСЕДАНИЯ
+    ========================= */
+
+    if(selectedExercise === "squat"){
+
+        const visible = [
+
+            23,24,
+            25,26,
+            27,28
+
+        ].every(i =>
+            p[i] &&
+            (p[i].visibility ?? 1) > .5
+        );
+
+
+        if(!visible)
+            return;
+
+
+        const leftKnee =
+            angle(
+                p[23],
+                p[25],
+                p[27]
+            );
+
+
+        const rightKnee =
+            angle(
+                p[24],
+                p[26],
+                p[28]
+            );
+
+
+        const kneeAngle =
+            (leftKnee + rightKnee) / 2;
+
+
+        if(kneeAngle < 105){
+
+            squatState = "down";
+
+        }
+
+        else if(
+            kneeAngle > 155 &&
+            squatState === "down"
+        ){
+
+            registerRep();
+
+            squatState = "up";
+
+        }
+
+    }
+
+});
+
+
+/* =========================
+   +1 ПОВТОР
+========================= */
+
+function registerRep(){
+
+    const now = Date.now();
+
+    if(now-lastRepTime < 700)
+        return;
+
+    lastRepTime = now;
+
+    counter++;
+
+    counterEl.textContent =
+        counter;
+
+
+    /*
+    +1 минута
+    */
+
+    balance++;
+
+    balanceEl.textContent =
+        balance;
+
+    localStorage.setItem(
+        "repBalance",
+        balance
+    );
+
+
+    /*
+    Анимация +1
+    */
+
+    repAnimation.classList.remove("show");
+
+    void repAnimation.offsetWidth;
+
+    repAnimation.classList.add("show");
+
+}
+
+
+/* =========================
+   ВЫБОР УПРАЖНЕНИЯ
+========================= */
+
+function selectExercise(exercise){
+
+    selectedExercise =
+        exercise;
+
+
+    document
+        .querySelectorAll(".card")
+        .forEach(card =>
+            card.classList.remove("active")
+        );
+
+
+    if(exercise === "pushup"){
+
+        document
+            .getElementById("pushupCard")
+            .classList.add("active");
+
+        statusEl.textContent =
+            "Готов к отжиманиям";
+
+    }
+
+
+    if(exercise === "squat"){
+
+        document
+            .getElementById("squatCard")
+            .classList.add("active");
+
+        statusEl.textContent =
+            "Готов к приседаниям";
+
+    }
+
+
+    if(exercise === "boxing"){
+
+        document
+            .getElementById("boxingCard")
+            .classList.add("active");
+
+        statusEl.textContent =
+            "BOX скоро";
+
+    }
+
+}
+
+
+/* =========================
+   КАМЕРА
+========================= */
+
+async function startCamera(){
+
+    if(cameraStarted)
+        return;
+
+
+    try{
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video:{
+                    facingMode:"user",
+
+                    width:{
+                        ideal:1280
+                    },
+
+                    height:{
+                        ideal:720
+                    }
+
+                },
+
+                audio:false
+
+            });
+
+
+        video.srcObject =
+            stream;
+
+
+        cameraStarted =
+            true;
+
+
+        await video.play();
+
+
+        messageEl.style.display =
+            "none";
+
+
+        statusEl.textContent =
+            "Ищем человека";
+
+
+        processVideo();
+
+
+    }catch(error){
+
+        console.error(error);
+
+        statusEl.textContent =
+            "Нет доступа к камере";
+
+    }
+
+}
+
+
+/* =========================
+   КАДРЫ
+========================= */
+
+async function processVideo(){
+
+    if(
+        cameraStarted &&
+        video.readyState >= 2
+    ){
+
+        try{
+
+            await pose.send({
+                image:video
+            });
+
+        }catch(error){
+
+            console.error(
+                "Pose:",
+                error
+            );
+
+        }
+
+    }
+
+
+    requestAnimationFrame(
+        processVideo
+    );
+
+}
+
+
+/* =========================
+   СБРОС
+========================= */
+
+function resetCounter(){
+
+    counter = 0;
+
     pushupState = "up";
+
     squatState = "up";
 
-    $("workoutModeName").textContent =
-      selectedExercise === "pushup" ? "Отжимания" :
-      selectedExercise === "squat" ? "Приседания" : "BOX";
+    counterEl.textContent =
+        "0";
 
-    $("repNumber").textContent = "0";
-    $("earnedNow").textContent = "+00:00";
-    $("repLabel").textContent = selectedExercise === "boxing" ? "попадания" : "повторов";
-    $("workoutBalance").textContent = formatTime(data.balanceSeconds);
-    $("repNumber").classList.remove("pop");
-    $("repLabel").classList.remove("pop");
+    statusEl.textContent =
+        "Счётчик сброшен";
 
-    showView("workout");
-    await startCamera();
+}
 
-    if (selectedExercise === "boxing") startBoxMode();
-  }
-
-  function closeWorkout() {
-    workoutRunning = false;
-    stopBoxMode();
-    cancelAnimationFrame(animationFrame);
-    animationFrame = null;
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      stream = null;
-    }
-    $("video").srcObject = null;
-    $("cameraStatus").classList.remove("live");
-    renderHome();
-    showView("home");
-  }
-
-  $("continueBtn").addEventListener("click", () => {
-    const name = $("nameInput").value.trim();
-    if (!name) {
-      $("nameInput").focus();
-      toast("Введи имя");
-      return;
-    }
-    data.name = name;
-    saveData();
-    renderHome();
-    showView("home");
-  });
-
-  document.querySelectorAll(".exercise").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedExercise = btn.dataset.exercise;
-      data.selectedExercise = selectedExercise;
-      saveData();
-      renderHome();
-    });
-  });
-
-  $("startBtn").addEventListener("click", openWorkout);
-  $("closeWorkout").addEventListener("click", closeWorkout);
-  $("finishWorkout").addEventListener("click", closeWorkout);
-
-  $("profileBtn").addEventListener("click", () => {
-    $("profileName").value = data.name;
-    $("profileModal").classList.add("show");
-  });
-
-  $("closeProfile").addEventListener("click", () => $("profileModal").classList.remove("show"));
-
-  $("saveProfile").addEventListener("click", () => {
-    const n = $("profileName").value.trim();
-    if (!n) return;
-    data.name = n;
-    saveData();
-    renderHome();
-    $("profileModal").classList.remove("show");
-    toast("Профиль сохранён");
-  });
-
-  $("resetData").addEventListener("click", () => {
-    if (!confirm("Сбросить имя, баланс и статистику?")) return;
-    localStorage.removeItem(STORAGE_KEY);
-    data = {...defaultData};
-    selectedExercise = "pushup";
-    $("profileModal").classList.remove("show");
-    $("nameInput").value = "";
-    showView("onboarding");
-    toast("Данные сброшены");
-  });
-
-  todayCheck();
-
-  if (data.name) {
-    renderHome();
-    showView("home");
-  } else {
-    showView("onboarding");
-  }
 </script>
+
 </body>
 </html>
