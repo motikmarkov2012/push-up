@@ -1,522 +1,873 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#07090b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>REP — Earn Your Screen Time</title>
 
-    <title>Push-Up Counter</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <style>
+    :root {
+      --bg: #07090b;
+      --panel: rgba(15, 18, 22, .78);
+      --panel-strong: rgba(18, 22, 27, .92);
+      --line: rgba(255,255,255,.095);
+      --line-strong: rgba(255,255,255,.16);
+      --text: #f4f7f5;
+      --muted: #8d9691;
+      --accent: #9cff4a;
+      --accent-2: #72d936;
+      --danger: #ff6767;
+      --radius: 24px;
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
 
-        body {
-            margin: 0;
-            background: #080808;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            overflow-x: hidden;
-        }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; width: 100%; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif; }
+    body { overflow-x: hidden; }
 
-        h1 {
-            margin: 18px 0 4px;
-            font-size: 28px;
-        }
+    button, input { font: inherit; }
+    button { color: inherit; }
 
-        .subtitle {
-            color: #888;
-            margin-bottom: 15px;
-        }
+    .app {
+      min-height: 100dvh;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(156,255,74,.10), transparent 36%),
+        linear-gradient(180deg, #080a0c 0%, #07090b 100%);
+    }
 
-        .camera-container {
-            position: relative;
-            width: min(95vw, 700px);
-            margin: auto;
-            overflow: hidden;
-            border-radius: 20px;
-            background: #111;
-        }
+    .app::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .28;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 90%);
+    }
 
-        video {
-            width: 100%;
-            display: block;
-            transform: scaleX(-1);
-        }
+    .view { display: none; min-height: 100dvh; position: relative; z-index: 1; }
+    .view.active { display: block; }
 
-        canvas {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            transform: scaleX(-1);
-            pointer-events: none;
-        }
+    /* ---------- ONBOARDING ---------- */
+    #onboarding {
+      padding: calc(34px + var(--safe-top)) 22px calc(28px + var(--safe-bottom));
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #onboarding.active { display: flex; }
 
-        .counter {
-            font-size: 80px;
-            font-weight: bold;
-            margin-top: 15px;
-        }
+    .onboard {
+      width: min(100%, 440px);
+    }
 
-        .status {
-            font-size: 18px;
-            color: #aaa;
-            min-height: 25px;
-        }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 62px;
+    }
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(156,255,74,.5);
+      border-radius: 13px;
+      position: relative;
+      box-shadow: 0 0 28px rgba(156,255,74,.08);
+    }
+    .brand-mark::before, .brand-mark::after {
+      content: "";
+      position: absolute;
+      background: var(--accent);
+    }
+    .brand-mark::before { width: 18px; height: 2px; left: 10px; top: 19px; }
+    .brand-mark::after { width: 2px; height: 18px; left: 19px; top: 10px; }
+    .brand-name { font-size: 18px; font-weight: 750; letter-spacing: .08em; }
 
-        button {
-            border: none;
-            border-radius: 14px;
-            padding: 15px 30px;
-            margin: 12px 5px;
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-            background: #1d7aff;
-        }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .hero-title {
+      font-size: clamp(40px, 11vw, 68px);
+      line-height: .94;
+      letter-spacing: -.055em;
+      margin: 0;
+      max-width: 600px;
+    }
+    .hero-subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+      margin: 22px 0 34px;
+      max-width: 420px;
+    }
 
-        button:active {
-            transform: scale(0.96);
-        }
+    .field {
+      background: rgba(255,255,255,.045);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      padding: 15px 17px;
+      transition: border-color .2s, background .2s;
+    }
+    .field:focus-within {
+      border-color: rgba(156,255,74,.45);
+      background: rgba(255,255,255,.06);
+    }
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: transparent;
+      font-size: 18px;
+    }
+    .field input::placeholder { color: #5e6661; }
 
-        .reset {
-            background: #333;
-        }
+    .primary {
+      width: 100%;
+      border: 0;
+      border-radius: 17px;
+      padding: 17px 20px;
+      margin-top: 12px;
+      background: var(--accent);
+      color: #091006;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 10px 35px rgba(156,255,74,.12);
+      transition: transform .15s, filter .15s;
+    }
+    .primary:active { transform: scale(.985); filter: brightness(.92); }
 
-        .info {
-            color: #777;
-            font-size: 14px;
-            max-width: 500px;
-            margin: 10px auto 30px;
-            padding: 0 15px;
-        }
+    /* ---------- HOME ---------- */
+    #home { padding-bottom: calc(92px + var(--safe-bottom)); }
 
-        .ready {
-            color: #35e36f;
-        }
+    .topbar {
+      padding: calc(18px + var(--safe-top)) 18px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 760px;
+      margin: auto;
+    }
 
-        .down {
-            color: #ffd43b;
-        }
+    .top-left { min-width: 0; }
+    .greeting { color: var(--muted); font-size: 12px; margin-bottom: 3px; }
+    .username { font-size: 21px; font-weight: 750; letter-spacing: -.025em; }
+    .profile-button {
+      width: 42px; height: 42px; border-radius: 14px;
+      border: 1px solid var(--line); background: rgba(255,255,255,.045);
+      display: grid; place-items: center; cursor: pointer;
+    }
+    .profile-button span {
+      width: 16px; height: 16px; border: 1px solid var(--muted); border-radius: 50%;
+      position: relative;
+    }
+    .profile-button span::after {
+      content:""; position:absolute; left:-5px; right:-5px; bottom:-10px; height:8px;
+      border:1px solid var(--muted); border-bottom:0; border-radius:10px 10px 0 0;
+    }
 
-        .up {
-            color: #35e36f;
-        }
-    </style>
+    .content { width: min(100%, 760px); margin: auto; padding: 8px 18px 0; }
+
+    .balance-card {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 85% 0%, rgba(156,255,74,.10), transparent 35%),
+        linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+    .balance-card::after {
+      content:"";
+      position:absolute; width:160px; height:160px; right:-70px; bottom:-80px;
+      border:1px solid rgba(156,255,74,.15); border-radius:50%;
+    }
+    .card-label {
+      color: var(--muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .balance {
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(48px, 14vw, 72px);
+      line-height: 1;
+      letter-spacing: -.065em;
+      margin: 10px 0 7px;
+      font-weight: 800;
+    }
+    .balance span { color: var(--accent); }
+    .balance-note { color: #707a74; font-size: 12px; }
+
+    .section-title {
+      margin: 25px 2px 11px;
+      font-size: 13px; font-weight: 700; color: #c8cec9;
+      letter-spacing: .02em;
+    }
+
+    .exercise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .exercise {
+      min-height: 142px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+      border-radius: 22px;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s, transform .15s, background .2s;
+    }
+    .exercise:active { transform: scale(.985); }
+    .exercise.selected {
+      border-color: rgba(156,255,74,.58);
+      background: linear-gradient(145deg, rgba(156,255,74,.10), rgba(255,255,255,.035));
+    }
+    .exercise-line {
+      position: absolute; top: 18px; right: 18px;
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1px solid #525a55;
+    }
+    .exercise.selected .exercise-line { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(156,255,74,.35); }
+    .exercise-icon {
+      width: 42px; height: 42px; border-radius: 14px;
+      border: 1px solid var(--line-strong);
+      display: grid; place-items: center; margin-bottom: 24px;
+      color: #dbe0dc;
+    }
+    .exercise-icon svg { width: 23px; height: 23px; }
+    .exercise-name { font-size: 17px; font-weight: 750; }
+    .exercise-meta { color: var(--muted); font-size: 11px; margin-top: 5px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; }
+    .stat {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.028);
+      border-radius: 17px;
+      padding: 14px 12px;
+    }
+    .stat-value { font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .stat-label { color: var(--muted); font-size: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: .08em; }
+
+    .start-button {
+      margin-top: 13px;
+      width: 100%;
+      min-height: 58px;
+      border-radius: 19px;
+      border: 1px solid rgba(156,255,74,.34);
+      background: rgba(156,255,74,.095);
+      color: var(--accent);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* ---------- WORKOUT ---------- */
+    #workout { background: #020304; }
+    .workout {
+      position: fixed; inset: 0; overflow: hidden;
+      background: #020304;
+    }
+    #video {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; transform: scaleX(-1);
+    }
+    #poseCanvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      transform: scaleX(-1);
+      pointer-events: none;
+    }
+    .camera-shade {
+      position: absolute; inset: 0; pointer-events:none;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.55), transparent 27%, transparent 62%, rgba(0,0,0,.68)),
+        radial-gradient(circle at center, transparent 35%, rgba(0,0,0,.20) 100%);
+    }
+
+    .workout-top {
+      position: absolute; z-index: 5; top: calc(16px + var(--safe-top)); left: 16px; right: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .glass {
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(7,9,11,.52);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.20);
+    }
+    .close {
+      width: 44px; height: 44px; border-radius: 15px;
+      display:grid; place-items:center; border:0; cursor:pointer;
+    }
+    .close::before, .close::after { content:""; width:18px; height:1.5px; background:#e8ece9; position:absolute; }
+    .close::before { transform:rotate(45deg); } .close::after { transform:rotate(-45deg); }
+
+    .workout-mode {
+      padding: 11px 15px; border-radius: 15px; text-align:center;
+    }
+    .workout-mode .small { color:#9aa39e; font-size:10px; letter-spacing:.12em; text-transform:uppercase; }
+    .workout-mode .mode-name { font-weight:750; font-size:13px; margin-top:3px; }
+
+    .rep-hud {
+      position:absolute; z-index:5; left:50%; top: calc(50% - 44px);
+      transform:translate(-50%,-50%); text-align:center; pointer-events:none;
+    }
+    .rep-number {
+      font-size: clamp(92px, 25vw, 168px);
+      line-height:.82;
+      letter-spacing:-.08em;
+      font-weight:850;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 8px 40px rgba(0,0,0,.45);
+    }
+    .rep-label {
+      margin-top:16px; color:rgba(255,255,255,.70); font-size:11px;
+      letter-spacing:.2em; text-transform:uppercase;
+    }
+
+    .bottom-hud {
+      position:absolute; z-index:6; left:14px; right:14px; bottom:calc(14px + var(--safe-bottom));
+      display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+    }
+    .hud-box {
+      min-width: 104px; padding:12px 14px; border-radius:16px;
+    }
+    .hud-label { color:#8d9691; font-size:9px; letter-spacing:.11em; text-transform:uppercase; }
+    .hud-value { font-size:16px; font-weight:750; margin-top:4px; font-variant-numeric:tabular-nums; }
+    .finish {
+      width: 58px; height: 58px; border-radius:19px; border:1px solid rgba(255,255,255,.18);
+      background:rgba(7,9,11,.58); backdrop-filter:blur(16px); cursor:pointer; display:grid; place-items:center;
+    }
+    .finish span { width:18px; height:18px; border:1px solid #f4f7f5; }
+
+    .camera-status {
+      position:absolute; z-index:6; top: calc(76px + var(--safe-top)); left:50%;
+      transform:translateX(-50%); padding:8px 12px; border-radius:999px;
+      color:#cbd1cd; font-size:10px; white-space:nowrap;
+    }
+    .camera-status.live { color:var(--accent); border-color:rgba(156,255,74,.25); }
+
+    /* ---------- PROFILE MODAL ---------- */
+    .modal {
+      position: fixed; inset: 0; z-index: 20; display:none; align-items:flex-end;
+      background:rgba(0,0,0,.55); backdrop-filter:blur(8px);
+    }
+    .modal.show { display:flex; }
+    .sheet {
+      width:100%; max-width:760px; margin:auto;
+      border:1px solid var(--line); border-bottom:0;
+      background:#0d1013; border-radius:28px 28px 0 0;
+      padding:18px 18px calc(24px + var(--safe-bottom));
+    }
+    .grab { width:40px; height:4px; border-radius:99px; background:#3d4440; margin:0 auto 22px; }
+    .sheet h2 { margin:0 0 18px; font-size:24px; }
+    .secondary {
+      width:100%; border:1px solid var(--line); background:rgba(255,255,255,.04);
+      border-radius:16px; padding:15px; margin-top:10px; cursor:pointer;
+    }
+    .danger { color:#ff8a8a; }
+
+    .toast {
+      position:fixed; z-index:50; left:50%; bottom:calc(84px + var(--safe-bottom));
+      transform:translate(-50%,20px); opacity:0; pointer-events:none;
+      background:#f1f5f2; color:#0a0d0b; padding:11px 15px; border-radius:12px;
+      font-size:12px; font-weight:700; transition:.25s; white-space:nowrap;
+    }
+    .toast.show { transform:translate(-50%,0); opacity:1; }
+
+    @media (min-width: 700px) {
+      #home { padding-bottom: 40px; }
+      .content { padding-top: 18px; }
+      .exercise-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
 </head>
 
 <body>
+<div class="app">
 
-<h1>💪 PUSH-UP COUNTER</h1>
-<div class="subtitle">Счётчик отжиманий через камеру</div>
+  <!-- ONBOARDING -->
+  <section id="onboarding" class="view active">
+    <div class="onboard">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-name">REP</div>
+      </div>
 
-<div class="camera-container">
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas"></canvas>
+      <div class="eyebrow">Earn your screen time</div>
+      <h1 class="hero-title">Твоё время<br>зависит от тебя.</h1>
+      <p class="hero-subtitle">
+        Выполняй упражнения, зарабатывай минуты и контролируй своё экранное время.
+      </p>
+
+      <div class="field">
+        <label for="nameInput">Как к тебе обращаться</label>
+        <input id="nameInput" maxlength="24" autocomplete="name" placeholder="Например, Матвей" />
+      </div>
+      <button id="continueBtn" class="primary">Продолжить</button>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section id="home" class="view">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="greeting">Добро пожаловать</div>
+        <div id="username" class="username">Пользователь</div>
+      </div>
+      <button id="profileBtn" class="profile-button" aria-label="Профиль"><span></span></button>
+    </header>
+
+    <main class="content">
+      <section class="balance-card">
+        <div class="card-label">Доступное время</div>
+        <div id="balance" class="balance">00<span>:00</span></div>
+        <div class="balance-note">1 повтор = 1 минута экранного времени</div>
+      </section>
+
+      <div class="section-title">Выбери упражнение</div>
+
+      <div class="exercise-grid">
+        <button class="exercise selected" data-exercise="pushup">
+          <div class="exercise-line"></div>
+          <div class="exercise-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 16.5h16M6.5 16.5l1.8-5.4c.35-1.05 1.25-1.76 2.36-1.84l2.2-.16c1.2-.09 2.31.58 2.78 1.69l1.1 2.61"/>
+              <path d="M8.2 11.1 6.3 9.2M17.8 13.4l1.5 1.5"/>
+            </svg>
+          </div>
+          <div class="exercise-name">Отжимания</div>
+          <div class="exercise-meta">Верхняя часть тела</div>
+        </button>
+
+        <button class="exercise" data-exercise="squat">
+          <div class="exercise-line"></div>
+          <div class="exercise-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="5" r="2.2"/>
+              <path d="M9.5 8.5 8 13l-3.5 3.5M14.5 8.5 16 13l3.5 3.5M8 13l4 2 4-2M12 15v5M8.2 20h7.6"/>
+            </svg>
+          </div>
+          <div class="exercise-name">Приседания</div>
+          <div class="exercise-meta">Нижняя часть тела</div>
+        </button>
+      </div>
+
+      <button id="startBtn" class="start-button">Начать тренировку</button>
+
+      <div class="section-title">Сегодня</div>
+      <div class="stats-grid">
+        <div class="stat"><div id="todayReps" class="stat-value">0</div><div class="stat-label">Повторов</div></div>
+        <div class="stat"><div id="todayMinutes" class="stat-value">0</div><div class="stat-label">Минут</div></div>
+        <div class="stat"><div id="streak" class="stat-value">1</div><div class="stat-label">Серия</div></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- WORKOUT -->
+  <section id="workout" class="view">
+    <div class="workout">
+      <video id="video" playsinline muted></video>
+      <canvas id="poseCanvas"></canvas>
+      <div class="camera-shade"></div>
+
+      <div class="workout-top">
+        <button id="closeWorkout" class="close glass" aria-label="Закрыть"></button>
+        <div class="workout-mode glass">
+          <div class="small">Режим</div>
+          <div id="workoutModeName" class="mode-name">Отжимания</div>
+        </div>
+      </div>
+
+      <div id="cameraStatus" class="camera-status glass">Подготовка камеры</div>
+
+      <div class="rep-hud">
+        <div id="repNumber" class="rep-number">0</div>
+        <div id="repLabel" class="rep-label">повторов</div>
+      </div>
+
+      <div class="bottom-hud">
+        <div class="hud-box glass">
+          <div class="hud-label">Заработано</div>
+          <div id="earnedNow" class="hud-value">+00:00</div>
+        </div>
+        <div class="hud-box glass">
+          <div class="hud-label">Баланс</div>
+          <div id="workoutBalance" class="hud-value">00:00</div>
+        </div>
+        <button id="finishWorkout" class="finish" aria-label="Завершить"><span></span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <div id="profileModal" class="modal">
+    <div class="sheet">
+      <div class="grab"></div>
+      <h2>Профиль</h2>
+      <div class="field">
+        <label for="profileName">Имя</label>
+        <input id="profileName" maxlength="24" />
+      </div>
+      <button id="saveProfile" class="primary">Сохранить</button>
+      <button id="resetData" class="secondary danger">Сбросить данные</button>
+      <button id="closeProfile" class="secondary">Закрыть</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
 </div>
-
-<div class="counter" id="counter">0</div>
-
-<div class="status" id="status">
-    Нажми «Запустить камеру»
-</div>
-
-<button onclick="startCamera()">
-    📷 Запустить камеру
-</button>
-
-<button class="reset" onclick="resetCounter()">
-    ↻ Сброс
-</button>
-
-<div class="info">
-    Встань лицом к камере так, чтобы были видны голова,
-    плечи, руки и корпус.
-</div>
-
-<!-- MediaPipe -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
 <script>
+  const STORAGE_KEY = "rep_app_v2";
 
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+  const defaultData = {
+    name: "",
+    balanceSeconds: 0,
+    todayReps: 0,
+    todayMinutes: 0,
+    streak: 1,
+    lastDate: new Date().toISOString().slice(0,10),
+    selectedExercise: "pushup"
+  };
 
-const counterElement = document.getElementById("counter");
-const statusElement = document.getElementById("status");
+  let data = loadData();
+  let selectedExercise = data.selectedExercise || "pushup";
+  let workoutReps = 0;
+  let workoutRunning = false;
+  let stream = null;
+  let pose = null;
+  let animationFrame = null;
+  let lastRepTime = 0;
+  let pushupState = "up";
+  let squatState = "up";
+  let lastPoseSeen = 0;
 
-let counter = 0;
-let state = "UP";
+  const $ = (id) => document.getElementById(id);
 
-let cameraStarted = false;
-let lastRepTime = 0;
+  function loadData() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      return { ...defaultData, ...(saved || {}) };
+    } catch { return { ...defaultData }; }
+  }
 
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
 
-/*
-    Расстояние между двумя точками
-*/
-function distance(a, b) {
-    return Math.sqrt(
-        Math.pow(a.x - b.x, 2) +
-        Math.pow(a.y - b.y, 2)
-    );
-}
+  function formatTime(seconds) {
+    seconds = Math.max(0, Math.floor(seconds));
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }
 
+  function showView(id) {
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    $(id).classList.add("active");
+  }
 
-/*
-    Средняя точка
-*/
-function middle(a, b) {
-    return {
-        x: (a.x + b.x) / 2,
-        y: (a.y + b.y) / 2
-    };
-}
+  function renderHome() {
+    $("username").textContent = data.name || "Пользователь";
+    $("balance").innerHTML = formatTime(data.balanceSeconds).replace(":", "<span>:</span>");
+    $("todayReps").textContent = data.todayReps;
+    $("todayMinutes").textContent = data.todayMinutes;
+    $("streak").textContent = data.streak;
 
+    document.querySelectorAll(".exercise").forEach(btn => {
+      btn.classList.toggle("selected", btn.dataset.exercise === selectedExercise);
+    });
+    $("startBtn").textContent = selectedExercise === "pushup"
+      ? "Начать отжимания"
+      : "Начать приседания";
+  }
 
-/*
-    Угол ABC
-*/
-function angle(a, b, c) {
+  function toast(message) {
+    const t = $("toast");
+    t.textContent = message;
+    t.classList.add("show");
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+  }
 
-    const ab = {
-        x: a.x - b.x,
-        y: a.y - b.y
-    };
-
-    const cb = {
-        x: c.x - b.x,
-        y: c.y - b.y
-    };
-
-    const dot =
-        ab.x * cb.x +
-        ab.y * cb.y;
-
-    const magAB =
-        Math.sqrt(ab.x ** 2 + ab.y ** 2);
-
-    const magCB =
-        Math.sqrt(cb.x ** 2 + cb.y ** 2);
-
-    if (magAB === 0 || magCB === 0)
-        return 180;
-
-    let cos =
-        dot / (magAB * magCB);
-
-    cos = Math.max(-1, Math.min(1, cos));
-
-    return Math.acos(cos) * 180 / Math.PI;
-}
-
-
-/*
-    MediaPipe Pose
-*/
-const pose = new Pose({
-    locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+  function todayCheck() {
+    const today = new Date().toISOString().slice(0,10);
+    if (data.lastDate !== today) {
+      data.todayReps = 0;
+      data.todayMinutes = 0;
+      data.lastDate = today;
+      data.streak = Math.max(1, data.streak);
+      saveData();
     }
-});
+  }
 
+  function angle(a,b,c) {
+    const ab = {x:a.x-b.x, y:a.y-b.y};
+    const cb = {x:c.x-b.x, y:c.y-b.y};
+    const dot = ab.x*cb.x + ab.y*cb.y;
+    const mag = Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y);
+    if (!mag) return 180;
+    return Math.acos(Math.max(-1,Math.min(1,dot/mag))) * 180 / Math.PI;
+  }
 
-pose.setOptions({
-    modelComplexity: 1,
-    smoothLandmarks: true,
-    enableSegmentation: false,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-});
+  function avg(a,b) { return (a+b)/2; }
 
-
-pose.onResults(results => {
-
-    if (!results.poseLandmarks)
-        return;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-    /*
-        Рисуем скелет
-    */
-
-    drawConnectors(
-        ctx,
-        results.poseLandmarks,
-        POSE_CONNECTIONS,
-        {
-            color: "#00ff66",
-            lineWidth: 4
-        }
-    );
-
-    drawLandmarks(
-        ctx,
-        results.poseLandmarks,
-        {
-            color: "#ffffff",
-            lineWidth: 2,
-            radius: 5
-        }
-    );
-
+  function processPose(results) {
+    if (!results.poseLandmarks) return;
+    lastPoseSeen = performance.now();
 
     const p = results.poseLandmarks;
+    const L = (i) => p[i];
+    const visible = (...ids) => ids.every(i => L(i) && (L(i).visibility ?? 1) > .45);
 
+    if (selectedExercise === "pushup") {
+      if (!visible(11,12,13,14,15,16)) return;
 
-    /*
-        Нужные точки:
+      const left = angle(L(11), L(13), L(15));
+      const right = angle(L(12), L(14), L(16));
+      const elbows = avg(left,right);
 
-        11 = левое плечо
-        12 = правое плечо
+      // Front-facing prototype: average elbow flexion.
+      // DOWN -> UP counts one rep.
+      if (elbows < 100) pushupState = "down";
+      if (elbows > 150 && pushupState === "down") {
+        registerRep();
+        pushupState = "up";
+      }
+    } else {
+      if (!visible(23,24,25,26,27,28)) return;
 
-        13 = левый локоть
-        14 = правый локоть
+      const leftKnee = angle(L(23), L(25), L(27));
+      const rightKnee = angle(L(24), L(26), L(28));
+      const knees = avg(leftKnee,rightKnee);
 
-        15 = левое запястье
-        16 = правое запястье
-    */
-
-    const leftShoulder = p[11];
-    const rightShoulder = p[12];
-
-    const leftElbow = p[13];
-    const rightElbow = p[14];
-
-    const leftWrist = p[15];
-    const rightWrist = p[16];
-
-
-    /*
-        Проверяем, что основные точки
-        действительно хорошо видны.
-    */
-
-    const visible =
-        leftShoulder.visibility > 0.5 &&
-        rightShoulder.visibility > 0.5 &&
-        leftElbow.visibility > 0.5 &&
-        rightElbow.visibility > 0.5 &&
-        leftWrist.visibility > 0.5 &&
-        rightWrist.visibility > 0.5;
-
-
-    if (!visible) {
-
-        statusElement.textContent =
-            "Встань дальше от камеры";
-
-        statusElement.className = "";
-
-        return;
+      // Squat: standing -> lowered -> standing.
+      if (knees < 105) squatState = "down";
+      if (knees > 155 && squatState === "down") {
+        registerRep();
+        squatState = "up";
+      }
     }
+  }
 
+  function registerRep() {
+    const now = performance.now();
+    if (now - lastRepTime < 650) return;
+    lastRepTime = now;
 
-    /*
-        Считаем угол в левом и правом локте.
-    */
+    workoutReps++;
+    data.balanceSeconds += 60;
+    data.todayReps++;
+    data.todayMinutes = Math.floor(data.balanceSeconds / 60);
+    saveData();
 
-    const leftAngle =
-        angle(
-            leftShoulder,
-            leftElbow,
-            leftWrist
-        );
+    $("repNumber").textContent = workoutReps;
+    $("earnedNow").textContent = "+" + formatTime(workoutReps * 60);
+    $("workoutBalance").textContent = formatTime(data.balanceSeconds);
+  }
 
-    const rightAngle =
-        angle(
-            rightShoulder,
-            rightElbow,
-            rightWrist
-        );
-
-
-    const elbowAngle =
-        (leftAngle + rightAngle) / 2;
-
-
-    /*
-        Расстояние между плечами.
-    */
-
-    const shoulderWidth =
-        distance(
-            leftShoulder,
-            rightShoulder
-        );
-
-
-    /*
-        Расстояние от плеч до запястий.
-        Используем как дополнительный показатель
-        положения тела.
-    */
-
-    const wristDistance =
-        (
-            distance(leftShoulder, leftWrist) +
-            distance(rightShoulder, rightWrist)
-        ) / 2;
-
-
-    /*
-        ЛОГИКА ОТЖИМАНИЯ
-
-        Когда руки почти прямые:
-            > 150 градусов
-
-        Когда руки согнуты:
-            < 105 градусов
-    */
-
-
-    if (elbowAngle > 150) {
-
-        if (state === "DOWN") {
-
-            const now = Date.now();
-
-            /*
-                Защита от двойного счёта
-            */
-
-            if (now - lastRepTime > 700) {
-
-                counter++;
-
-                counterElement.textContent =
-                    counter;
-
-                lastRepTime = now;
-            }
-
-            state = "UP";
-        }
-
-        statusElement.textContent =
-            "⬆️ Вверх";
-
-        statusElement.className = "up";
-
-    }
-
-    else if (elbowAngle < 105) {
-
-        state = "DOWN";
-
-        statusElement.textContent =
-            "⬇️ Вниз";
-
-        statusElement.className = "down";
-    }
-
-    else {
-
-        statusElement.textContent =
-            "Готово";
-
-        statusElement.className =
-            "ready";
-    }
-
-});
-
-
-/*
-    Запуск камеры
-*/
-
-async function startCamera() {
-
-    if (cameraStarted)
-        return;
-
+  async function startCamera() {
+    $("cameraStatus").textContent = "Запрашиваем доступ к камере";
     try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: {ideal:1280}, height:{ideal:720} },
+        audio: false
+      });
+      $("video").srcObject = stream;
+      await $("video").play();
 
-        const stream =
-            await navigator.mediaDevices.getUserMedia({
+      const canvas = $("poseCanvas");
+      canvas.width = $("video").videoWidth || 1280;
+      canvas.height = $("video").videoHeight || 720;
 
-                video: {
-                    facingMode: "user",
-                    width: {
-                        ideal: 1280
-                    },
-                    height: {
-                        ideal: 720
-                    }
-                },
-
-                audio: false
-            });
-
-        video.srcObject = stream;
-
-        cameraStarted = true;
-
-        statusElement.textContent =
-            "Камера запущена";
-
-        processVideo();
-
-    } catch (error) {
-
-        console.error(error);
-
-        statusElement.textContent =
-            "Не удалось получить доступ к камере";
-    }
-}
-
-
-/*
-    Постоянно отправляем кадры в MediaPipe
-*/
-
-async function processVideo() {
-
-    if (video.readyState >= 2) {
-
-        await pose.send({
-            image: video
+      if (!pose) {
+        pose = new Pose({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
         });
+        pose.setOptions({
+          modelComplexity: 1,
+          smoothLandmarks: true,
+          enableSegmentation: false,
+          minDetectionConfidence: .55,
+          minTrackingConfidence: .55
+        });
+        pose.onResults(drawResults);
+      }
+
+      $("cameraStatus").textContent = "Камера активна";
+      $("cameraStatus").classList.add("live");
+      loopPose();
+    } catch (err) {
+      console.error(err);
+      $("cameraStatus").textContent = "Нет доступа к камере";
+      toast("Разреши доступ к камере и попробуй снова");
+    }
+  }
+
+  async function loopPose() {
+    if (!workoutRunning || !pose || !$("video").srcObject) return;
+    if ($("video").readyState >= 2) {
+      try { await pose.send({image: $("video")}); } catch(e) {}
+    }
+    animationFrame = requestAnimationFrame(loopPose);
+  }
+
+  function drawResults(results) {
+    const canvas = $("poseCanvas");
+    const ctx = canvas.getContext("2d");
+    if (canvas.width !== $("video").videoWidth) {
+      canvas.width = $("video").videoWidth || 1280;
+      canvas.height = $("video").videoHeight || 720;
+    }
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    if (results.poseLandmarks) {
+      drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
+        color: "rgba(156,255,74,.80)", lineWidth: 3
+      });
+      drawLandmarks(ctx, results.poseLandmarks, {
+        color: "#f4f7f5", lineWidth: 1, radius: 3
+      });
+      processPose(results);
+    }
+  }
+
+  async function openWorkout() {
+    workoutReps = 0;
+    pushupState = "up";
+    squatState = "up";
+    workoutRunning = true;
+
+    $("workoutModeName").textContent = selectedExercise === "pushup" ? "Отжимания" : "Приседания";
+    $("repNumber").textContent = "0";
+    $("earnedNow").textContent = "+00:00";
+    $("workoutBalance").textContent = formatTime(data.balanceSeconds);
+
+    showView("workout");
+    await startCamera();
+  }
+
+  function closeWorkout() {
+    workoutRunning = false;
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    $("video").srcObject = null;
+    $("cameraStatus").classList.remove("live");
+    renderHome();
+    showView("home");
+  }
+
+  function registerUser() {
+    const input = $("nameInput");
+    const name = (input.value || "").trim();
+
+    if (!name) {
+      input.focus();
+      toast("Введи имя");
+      return false;
     }
 
-    requestAnimationFrame(processVideo);
-}
+    data.name = name;
+    try {
+      saveData();
+    } catch (e) {
+      console.warn("Не удалось сохранить данные:", e);
+    }
 
+    // Переходим сразу — регистрация не зависит от камеры, MediaPipe или сети.
+    $("username").textContent = name;
+    renderHome();
+    showView("home");
+    return false;
+  }
 
-/*
-    Сброс
-*/
+  $("continueBtn").addEventListener("click", registerUser);
+  $("nameInput").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") registerUser();
+  });
 
-function resetCounter() {
+  document.querySelectorAll(".exercise").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedExercise = btn.dataset.exercise;
+      data.selectedExercise = selectedExercise;
+      saveData();
+      renderHome();
+    });
+  });
 
-    counter = 0;
-    state = "UP";
+  $("startBtn").addEventListener("click", openWorkout);
+  $("closeWorkout").addEventListener("click", closeWorkout);
+  $("finishWorkout").addEventListener("click", closeWorkout);
 
-    counterElement.textContent =
-        "0";
+  $("profileBtn").addEventListener("click", () => {
+    $("profileName").value = data.name;
+    $("profileModal").classList.add("show");
+  });
 
-    statusElement.textContent =
-        "Счётчик сброшен";
-}
+  $("closeProfile").addEventListener("click", () => $("profileModal").classList.remove("show"));
 
+  $("saveProfile").addEventListener("click", () => {
+    const n = $("profileName").value.trim();
+    if (!n) return;
+    data.name = n;
+    saveData();
+    renderHome();
+    $("profileModal").classList.remove("show");
+    toast("Профиль сохранён");
+  });
+
+  $("resetData").addEventListener("click", () => {
+    if (!confirm("Сбросить имя, баланс и статистику?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    data = {...defaultData};
+    selectedExercise = "pushup";
+    $("profileModal").classList.remove("show");
+    $("nameInput").value = "";
+    showView("onboarding");
+    toast("Данные сброшены");
+  });
+
+  try { todayCheck(); } catch (e) { console.warn(e); }
+
+  // Стартовый экран выбирается независимо от загрузки камеры.
+  if (data.name && String(data.name).trim()) {
+    renderHome();
+    showView("home");
+  } else {
+    showView("onboarding");
+  }
 </script>
-
 </body>
 </html>
