@@ -39,9 +39,7 @@
       min-height: 100dvh;
       position: relative;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 50% -10%, rgba(156,255,74,.10), transparent 36%),
-        linear-gradient(180deg, #080a0c 0%, #07090b 100%);
+      background: linear-gradient(180deg, #080a0c 0%, #07090b 100%);
     }
 
     .app::before {
@@ -51,10 +49,10 @@
       pointer-events: none;
       opacity: .28;
       background-image:
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: linear-gradient(to bottom, black, transparent 90%);
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
     }
 
     .view { display: none; min-height: 100dvh; position: relative; z-index: 1; }
@@ -196,12 +194,10 @@
     .content { width: min(100%, 760px); margin: auto; padding: 8px 18px 0; }
 
     .balance-card {
-      margin-top: 14px;
+      margin-top: 12px;
       border: 1px solid var(--line);
-      border-radius: 28px;
-      background:
-        radial-gradient(circle at 85% 0%, rgba(156,255,74,.10), transparent 35%),
-        linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+      border-radius: 22px;
+      background: rgba(255,255,255,.035);
       padding: 22px;
       position: relative;
       overflow: hidden;
@@ -233,10 +229,10 @@
 
     .exercise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
     .exercise {
-      min-height: 142px;
+      min-height: 126px;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.035);
-      border-radius: 22px;
+      background: rgba(255,255,255,.028);
+      border-radius: 18px;
       padding: 18px;
       text-align: left;
       cursor: pointer;
@@ -256,9 +252,9 @@
     }
     .exercise.selected .exercise-line { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(156,255,74,.35); }
     .exercise-icon {
-      width: 42px; height: 42px; border-radius: 14px;
+      width: 38px; height: 38px; border-radius: 11px;
       border: 1px solid var(--line-strong);
-      display: grid; place-items: center; margin-bottom: 24px;
+      display: grid; place-items: center; margin-bottom: 18px;
       color: #dbe0dc;
     }
     .exercise-icon svg { width: 23px; height: 23px; }
@@ -392,6 +388,83 @@
     }
     .danger { color:#ff8a8a; }
 
+
+    .setup-overlay {
+      position: fixed; inset: 0; z-index: 15;
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+      background: #080a0c;
+    }
+    .setup-overlay.show { display: flex; }
+    .setup-card {
+      width: min(100%, 430px);
+      text-align: center;
+    }
+    .setup-title {
+      font-size: 30px; font-weight: 800; letter-spacing: -.04em;
+      margin: 0 0 8px;
+    }
+    .setup-subtitle {
+      color: var(--muted); font-size: 14px; line-height: 1.5;
+      max-width: 330px; margin: 0 auto 22px;
+    }
+    .person-stage {
+      width: 100%; height: 310px; position: relative;
+      border: 1px solid var(--line-strong); border-radius: 24px;
+      background:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        #0b0e11;
+      background-size: 32px 32px;
+      display: grid; place-items: center;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .person-stage::before {
+      content: "";
+      position: absolute; inset: 22px;
+      border: 1px solid rgba(156,255,74,.28);
+      border-radius: 16px;
+    }
+    .person-svg { width: 190px; height: 250px; position: relative; z-index: 1; }
+    .setup-hint {
+      font-size: 11px; color: #9ca49f;
+      letter-spacing: .08em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .setup-cancel {
+      width: 100%; padding: 14px; border: 1px solid var(--line);
+      border-radius: 15px; background: transparent; color: #b8c0bb;
+      cursor: pointer;
+    }
+
+    .body-frame {
+      position: absolute; z-index: 4;
+      left: 50%; top: 50%; width: min(74vw, 330px); height: min(70vh, 560px);
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(156,255,74,.55);
+      border-radius: 28px;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,.08);
+    }
+    .body-frame::before, .body-frame::after {
+      content:""; position:absolute; width:28px; height:28px;
+      border-color: var(--accent); border-style: solid;
+    }
+    .body-frame::before {
+      left:-2px; top:-2px; border-width:3px 0 0 3px; border-radius:7px 0 0 0;
+    }
+    .body-frame::after {
+      right:-2px; bottom:-2px; border-width:0 3px 3px 0; border-radius:0 0 7px 0;
+    }
+    .frame-label {
+      position:absolute; left:50%; top:-12px; transform:translateX(-50%);
+      padding:4px 9px; background:#07090b; color:var(--accent);
+      border:1px solid rgba(156,255,74,.35); border-radius:7px;
+      font-size:9px; letter-spacing:.12em; text-transform:uppercase;
+      white-space:nowrap;
+    }
+
     .toast {
       position:fixed; z-index:50; left:50%; bottom:calc(84px + var(--safe-bottom));
       transform:translate(-50%,20px); opacity:0; pointer-events:none;
@@ -495,6 +568,7 @@
       <video id="video" playsinline muted></video>
       <canvas id="poseCanvas"></canvas>
       <div class="camera-shade"></div>
+      <div class="body-frame"><div class="frame-label">Положение тела</div></div>
 
       <div class="workout-top">
         <button id="closeWorkout" class="close glass" aria-label="Закрыть"></button>
@@ -524,6 +598,34 @@
       </div>
     </div>
   </section>
+
+
+  <!-- PRE-WORKOUT SETUP -->
+  <div id="setupOverlay" class="setup-overlay">
+    <div class="setup-card">
+      <div id="setupExercise" class="eyebrow">Отжимания</div>
+      <h2 class="setup-title">Поставь камеру правильно</h2>
+      <p class="setup-subtitle">Встань полностью в кадр. Держи тело внутри рамки — так распознавание будет точнее.</p>
+
+      <div class="person-stage">
+        <svg id="setupPerson" class="person-svg" viewBox="0 0 190 250" fill="none" aria-hidden="true">
+          <!-- Clean vector guide, not a sticker -->
+          <circle cx="95" cy="34" r="17" stroke="#f2f5f3" stroke-width="3"/>
+          <path d="M95 52 L95 118" stroke="#9cff4a" stroke-width="5" stroke-linecap="round"/>
+          <path d="M95 68 L55 103 L37 132" stroke="#f2f5f3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M95 68 L135 103 L153 132" stroke="#f2f5f3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M95 118 L65 177 L55 221" stroke="#f2f5f3" stroke-width="5" stroke-linecap="round"/>
+          <path d="M95 118 L125 177 L135 221" stroke="#f2f5f3" stroke-width="5" stroke-linecap="round"/>
+          <path d="M46 132 L28 132 M144 132 L162 132" stroke="#9cff4a" stroke-width="4" stroke-linecap="round"/>
+          <path d="M46 225 L65 225 M125 225 L144 225" stroke="#9cff4a" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="setup-hint">Фигура должна полностью помещаться в рамку</div>
+      <button id="setupStart" class="primary">Включить камеру</button>
+      <button id="setupCancel" class="setup-cancel">Назад</button>
+    </div>
+  </div>
 
   <!-- PROFILE -->
   <div id="profileModal" class="modal">
@@ -567,6 +669,8 @@
   let pushupState = "up";
   let squatState = "up";
   let lastPoseSeen = 0;
+  let squatKneeSmooth = 180;
+  let squatHipSmooth = .20;
 
   const $ = (id) => document.getElementById(id);
 
@@ -667,11 +771,25 @@
 
       const leftKnee = angle(L(23), L(25), L(27));
       const rightKnee = angle(L(24), L(26), L(28));
-      const knees = avg(leftKnee,rightKnee);
+      const kneesRaw = avg(leftKnee,rightKnee);
+      squatKneeSmooth = squatKneeSmooth * .72 + kneesRaw * .28;
 
-      // Squat: standing -> lowered -> standing.
-      if (knees < 105) squatState = "down";
-      if (knees > 155 && squatState === "down") {
+      // Front-camera squat detection:
+      // knee angle alone is unreliable, so combine it with hip position.
+      const hipY = avg(L(23).y, L(24).y);
+      const shoulderY = avg(L(11).y, L(12).y);
+      const kneeY = avg(L(25).y, L(26).y);
+      const bodyHeight = Math.max(.15, kneeY - shoulderY);
+      const hipDropRaw = (hipY - shoulderY) / bodyHeight;
+      squatHipSmooth = squatHipSmooth * .72 + hipDropRaw * .28;
+
+      // Lowered position: bent knees + hips visibly descend.
+      if ((squatKneeSmooth < 128 && squatHipSmooth > .38) || squatHipSmooth > .53) {
+        squatState = "down";
+      }
+
+      // Return to standing: knees extend and hips rise.
+      if (squatKneeSmooth > 148 && squatHipSmooth < .30 && squatState === "down") {
         registerRep();
         squatState = "up";
       }
@@ -751,10 +869,10 @@
 
     if (results.poseLandmarks) {
       drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
-        color: "rgba(156,255,74,.80)", lineWidth: 3
+        color: "#b6ff68", lineWidth: 7
       });
       drawLandmarks(ctx, results.poseLandmarks, {
-        color: "#f4f7f5", lineWidth: 1, radius: 3
+        color: "#ffffff", fillColor: "#b6ff68", lineWidth: 3, radius: 5
       });
       processPose(results);
     }
@@ -764,6 +882,15 @@
     workoutReps = 0;
     pushupState = "up";
     squatState = "up";
+
+    $("setupExercise").textContent = selectedExercise === "pushup" ? "Отжимания" : "Приседания";
+    $("setupPerson").style.transform = selectedExercise === "pushup" ? "rotate(90deg) scale(.78)" : "none";
+    $("setupPerson").style.transition = "transform .25s ease";
+    $("setupOverlay").classList.add("show");
+  }
+
+  async function confirmWorkoutStart() {
+    $("setupOverlay").classList.remove("show");
     workoutRunning = true;
 
     $("workoutModeName").textContent = selectedExercise === "pushup" ? "Отжимания" : "Приседания";
@@ -828,6 +955,8 @@
   });
 
   $("startBtn").addEventListener("click", openWorkout);
+  $("setupStart").addEventListener("click", confirmWorkoutStart);
+  $("setupCancel").addEventListener("click", () => $("setupOverlay").classList.remove("show"));
   $("closeWorkout").addEventListener("click", closeWorkout);
   $("finishWorkout").addEventListener("click", closeWorkout);
 
