@@ -335,6 +335,7 @@
     }
     .rep-number {
       font-size: clamp(92px, 25vw, 168px);
+      transition: transform .12s ease, color .12s ease;
       line-height:.82;
       letter-spacing:-.08em;
       font-weight:850;
@@ -342,8 +343,8 @@
       text-shadow: 0 8px 40px rgba(0,0,0,.45);
     }
     .rep-label {
-      margin-top:16px; color:rgba(255,255,255,.70); font-size:11px;
-      letter-spacing:.2em; text-transform:uppercase;
+      margin-top:12px; color:rgba(255,255,255,.70); font-size:10px;
+      letter-spacing:.18em; text-transform:uppercase;
     }
 
     .bottom-hud {
@@ -351,7 +352,7 @@
       display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
     }
     .hud-box {
-      min-width: 104px; padding:12px 14px; border-radius:16px;
+      min-width: 98px; padding:10px 12px; border-radius:14px;
     }
     .hud-label { color:#8d9691; font-size:9px; letter-spacing:.11em; text-transform:uppercase; }
     .hud-value { font-size:16px; font-weight:750; margin-top:4px; font-variant-numeric:tabular-nums; }
@@ -405,8 +406,8 @@
       margin: 0 0 8px;
     }
     .setup-subtitle {
-      color: var(--muted); font-size: 14px; line-height: 1.5;
-      max-width: 330px; margin: 0 auto 22px;
+      color: var(--muted); font-size: 13px; line-height: 1.5;
+      max-width: 320px; margin: 0 auto 18px;
     }
     .person-stage {
       width: 100%; height: 310px; position: relative;
@@ -442,26 +443,29 @@
       position: absolute; z-index: 4;
       left: 50%; top: 50%; width: min(74vw, 330px); height: min(70vh, 560px);
       transform: translate(-50%, -50%);
-      border: 2px solid rgba(156,255,74,.55);
+      border: 2px solid rgba(165,255,55,.90);
       border-radius: 28px;
       pointer-events: none;
       box-shadow: 0 0 0 9999px rgba(0,0,0,.08);
+      opacity: 1;
+      transition: opacity .55s ease, transform .35s ease;
     }
+    .body-frame.hidden { opacity: 0; }
     .body-frame::before, .body-frame::after {
-      content:""; position:absolute; width:28px; height:28px;
-      border-color: var(--accent); border-style: solid;
+      content:""; position:absolute; width:30px; height:30px;
+      border-color: #a5ff37; border-style: solid;
     }
     .body-frame::before {
-      left:-2px; top:-2px; border-width:3px 0 0 3px; border-radius:7px 0 0 0;
+      left:-2px; top:-2px; border-width:4px 0 0 4px; border-radius:8px 0 0 0;
     }
     .body-frame::after {
-      right:-2px; bottom:-2px; border-width:0 3px 3px 0; border-radius:0 0 7px 0;
+      right:-2px; bottom:-2px; border-width:0 4px 4px 0; border-radius:0 0 8px 0;
     }
     .frame-label {
-      position:absolute; left:50%; top:-12px; transform:translateX(-50%);
-      padding:4px 9px; background:#07090b; color:var(--accent);
-      border:1px solid rgba(156,255,74,.35); border-radius:7px;
-      font-size:9px; letter-spacing:.12em; text-transform:uppercase;
+      position:absolute; left:50%; top:-13px; transform:translateX(-50%);
+      padding:5px 10px; background:#07090b; color:#a5ff37;
+      border:1px solid rgba(165,255,55,.55); border-radius:8px;
+      font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
       white-space:nowrap;
     }
 
@@ -568,7 +572,7 @@
       <video id="video" playsinline muted></video>
       <canvas id="poseCanvas"></canvas>
       <div class="camera-shade"></div>
-      <div class="body-frame"><div class="frame-label">Положение тела</div></div>
+      <div id="bodyGuide" class="body-frame"><div class="frame-label">Калибровка</div></div>
 
       <div class="workout-top">
         <button id="closeWorkout" class="close glass" aria-label="Закрыть"></button>
@@ -671,6 +675,9 @@
   let lastPoseSeen = 0;
   let squatKneeSmooth = 180;
   let squatHipSmooth = .20;
+  let calibrationStart = 0;
+  let calibrationReadySince = 0;
+  let calibrationStable = false;
 
   const $ = (id) => document.getElementById(id);
 
@@ -752,6 +759,24 @@
     const L = (i) => p[i];
     const visible = (...ids) => ids.every(i => L(i) && (L(i).visibility ?? 1) > .45);
 
+    // Short automatic calibration. Once the body is stable and mostly visible,
+    // the guide disappears and never covers the workout again.
+    const required = selectedExercise === "pushup"
+      ? [11,12,13,14,15,16]
+      : [11,12,23,24,25,26,27,28];
+
+    const enough = required.every(i => L(i) && (L(i).visibility ?? 1) > .55);
+    if (enough) {
+      if (!calibrationStart) calibrationStart = performance.now();
+      if (performance.now() - calibrationStart > 1400) {
+        calibrationReadySince = performance.now();
+        calibrationStable = true;
+        $("bodyGuide").classList.add("hidden");
+      }
+    } else {
+      calibrationStart = 0;
+    }
+
     if (selectedExercise === "pushup") {
       if (!visible(11,12,13,14,15,16)) return;
 
@@ -771,25 +796,39 @@
 
       const leftKnee = angle(L(23), L(25), L(27));
       const rightKnee = angle(L(24), L(26), L(28));
-      const kneesRaw = avg(leftKnee,rightKnee);
-      squatKneeSmooth = squatKneeSmooth * .72 + kneesRaw * .28;
+      const kneesRaw = avg(leftKnee, rightKnee);
+      squatKneeSmooth = squatKneeSmooth * .78 + kneesRaw * .22;
 
-      // Front-camera squat detection:
-      // knee angle alone is unreliable, so combine it with hip position.
-      const hipY = avg(L(23).y, L(24).y);
       const shoulderY = avg(L(11).y, L(12).y);
+      const hipY = avg(L(23).y, L(24).y);
       const kneeY = avg(L(25).y, L(26).y);
-      const bodyHeight = Math.max(.15, kneeY - shoulderY);
-      const hipDropRaw = (hipY - shoulderY) / bodyHeight;
-      squatHipSmooth = squatHipSmooth * .72 + hipDropRaw * .28;
+      const ankleY = avg(L(27).y, L(28).y);
 
-      // Lowered position: bent knees + hips visibly descend.
-      if ((squatKneeSmooth < 128 && squatHipSmooth > .38) || squatHipSmooth > .53) {
-        squatState = "down";
-      }
+      // Normalize body geometry so distance from camera matters less.
+      const torso = Math.max(.08, Math.abs(hipY - shoulderY));
+      const thigh = Math.max(.08, Math.abs(kneeY - hipY));
+      const shin = Math.max(.08, Math.abs(ankleY - kneeY));
 
-      // Return to standing: knees extend and hips rise.
-      if (squatKneeSmooth > 148 && squatHipSmooth < .30 && squatState === "down") {
+      const hipBelowShoulder = (hipY - shoulderY) / torso;
+      const kneeSpread = Math.abs(L(25).x - L(26).x);
+
+      // A front squat has three useful signals:
+      // 1) knees bend,
+      // 2) hips move down,
+      // 3) the knee/hip geometry changes substantially.
+      const lowered =
+        squatKneeSmooth < 138 &&
+        hipBelowShoulder > 1.05 &&
+        thigh < torso * 1.35 &&
+        kneeSpread > .05;
+
+      const standing =
+        squatKneeSmooth > 155 &&
+        hipBelowShoulder < 1.00;
+
+      if (lowered) squatState = "down";
+
+      if (standing && squatState === "down") {
         registerRep();
         squatState = "up";
       }
@@ -808,6 +847,12 @@
     saveData();
 
     $("repNumber").textContent = workoutReps;
+    $("repNumber").style.transform = "scale(1.10)";
+    $("repNumber").style.color = "#a5ff37";
+    setTimeout(() => {
+      $("repNumber").style.transform = "scale(1)";
+      $("repNumber").style.color = "";
+    }, 130);
     $("earnedNow").textContent = "+" + formatTime(workoutReps * 60);
     $("workoutBalance").textContent = formatTime(data.balanceSeconds);
   }
@@ -868,12 +913,25 @@
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     if (results.poseLandmarks) {
+      // Thick, high-contrast lime skeleton.
       drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
-        color: "#b6ff68", lineWidth: 7
+        color: "#a5ff37", lineWidth: 20, lineCap: "round", lineJoin: "round"
       });
-      drawLandmarks(ctx, results.poseLandmarks, {
-        color: "#ffffff", fillColor: "#b6ff68", lineWidth: 3, radius: 5
-      });
+
+      // Only major joints are emphasized; wrist/hand/finger points stay small.
+      const major = [11,12,13,14,23,24,25,26,27,28,0];
+      for (const i of major) {
+        const lm = results.poseLandmarks[i];
+        if (!lm || (lm.visibility ?? 1) < .4) continue;
+        const r = i === 0 ? 8 : 11;
+        ctx.beginPath();
+        ctx.arc(lm.x * canvas.width, lm.y * canvas.height, r, 0, Math.PI * 2);
+        ctx.fillStyle = "#c9ff79";
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#0a0d08";
+        ctx.stroke();
+      }
       processPose(results);
     }
   }
@@ -882,6 +940,10 @@
     workoutReps = 0;
     pushupState = "up";
     squatState = "up";
+    calibrationStart = 0;
+    calibrationReadySince = 0;
+    calibrationStable = false;
+    $("bodyGuide").classList.remove("hidden");
 
     $("setupExercise").textContent = selectedExercise === "pushup" ? "Отжимания" : "Приседания";
     $("setupPerson").style.transform = selectedExercise === "pushup" ? "rotate(90deg) scale(.78)" : "none";
