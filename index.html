@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <title>Push-Up Counter</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #080808;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            margin: 18px 0 4px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .camera-container {
+            position: relative;
+            width: min(95vw, 700px);
+            margin: auto;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #111;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+            pointer-events: none;
+        }
+
+        .counter {
+            font-size: 80px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .status {
+            font-size: 18px;
+            color: #aaa;
+            min-height: 25px;
+        }
+
+        button {
+            border: none;
+            border-radius: 14px;
+            padding: 15px 30px;
+            margin: 12px 5px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: #1d7aff;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .reset {
+            background: #333;
+        }
+
+        .info {
+            color: #777;
+            font-size: 14px;
+            max-width: 500px;
+            margin: 10px auto 30px;
+            padding: 0 15px;
+        }
+
+        .ready {
+            color: #35e36f;
+        }
+
+        .down {
+            color: #ffd43b;
+        }
+
+        .up {
+            color: #35e36f;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>💪 PUSH-UP COUNTER</h1>
+<div class="subtitle">Счётчик отжиманий через камеру</div>
+
+<div class="camera-container">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+</div>
+
+<div class="counter" id="counter">0</div>
+
+<div class="status" id="status">
+    Нажми «Запустить камеру»
+</div>
+
+<button onclick="startCamera()">
+    📷 Запустить камеру
+</button>
+
+<button class="reset" onclick="resetCounter()">
+    ↻ Сброс
+</button>
+
+<div class="info">
+    Встань лицом к камере так, чтобы были видны голова,
+    плечи, руки и корпус.
+</div>
+
+<!-- MediaPipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
+<script>
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const counterElement = document.getElementById("counter");
+const statusElement = document.getElementById("status");
+
+let counter = 0;
+let state = "UP";
+
+let cameraStarted = false;
+let lastRepTime = 0;
+
+
+/*
+    Расстояние между двумя точками
+*/
+function distance(a, b) {
+    return Math.sqrt(
+        Math.pow(a.x - b.x, 2) +
+        Math.pow(a.y - b.y, 2)
+    );
+}
+
+
+/*
+    Средняя точка
+*/
+function middle(a, b) {
+    return {
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2
+    };
+}
+
+
+/*
+    Угол ABC
+*/
+function angle(a, b, c) {
+
+    const ab = {
+        x: a.x - b.x,
+        y: a.y - b.y
+    };
+
+    const cb = {
+        x: c.x - b.x,
+        y: c.y - b.y
+    };
+
+    const dot =
+        ab.x * cb.x +
+        ab.y * cb.y;
+
+    const magAB =
+        Math.sqrt(ab.x ** 2 + ab.y ** 2);
+
+    const magCB =
+        Math.sqrt(cb.x ** 2 + cb.y ** 2);
+
+    if (magAB === 0 || magCB === 0)
+        return 180;
+
+    let cos =
+        dot / (magAB * magCB);
+
+    cos = Math.max(-1, Math.min(1, cos));
+
+    return Math.acos(cos) * 180 / Math.PI;
+}
+
+
+/*
+    MediaPipe Pose
+*/
+const pose = new Pose({
+    locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+    }
+});
+
+
+pose.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+});
+
+
+pose.onResults(results => {
+
+    if (!results.poseLandmarks)
+        return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    /*
+        Рисуем скелет
+    */
+
+    drawConnectors(
+        ctx,
+        results.poseLandmarks,
+        POSE_CONNECTIONS,
+        {
+            color: "#00ff66",
+            lineWidth: 4
+        }
+    );
+
+    drawLandmarks(
+        ctx,
+        results.poseLandmarks,
+        {
+            color: "#ffffff",
+            lineWidth: 2,
+            radius: 5
+        }
+    );
+
+
+    const p = results.poseLandmarks;
+
+
+    /*
+        Нужные точки:
+
+        11 = левое плечо
+        12 = правое плечо
+
+        13 = левый локоть
+        14 = правый локоть
+
+        15 = левое запястье
+        16 = правое запястье
+    */
+
+    const leftShoulder = p[11];
+    const rightShoulder = p[12];
+
+    const leftElbow = p[13];
+    const rightElbow = p[14];
+
+    const leftWrist = p[15];
+    const rightWrist = p[16];
+
+
+    /*
+        Проверяем, что основные точки
+        действительно хорошо видны.
+    */
+
+    const visible =
+        leftShoulder.visibility > 0.5 &&
+        rightShoulder.visibility > 0.5 &&
+        leftElbow.visibility > 0.5 &&
+        rightElbow.visibility > 0.5 &&
+        leftWrist.visibility > 0.5 &&
+        rightWrist.visibility > 0.5;
+
+
+    if (!visible) {
+
+        statusElement.textContent =
+            "Встань дальше от камеры";
+
+        statusElement.className = "";
+
+        return;
+    }
+
+
+    /*
+        Считаем угол в левом и правом локте.
+    */
+
+    const leftAngle =
+        angle(
+            leftShoulder,
+            leftElbow,
+            leftWrist
+        );
+
+    const rightAngle =
+        angle(
+            rightShoulder,
+            rightElbow,
+            rightWrist
+        );
+
+
+    const elbowAngle =
+        (leftAngle + rightAngle) / 2;
+
+
+    /*
+        Расстояние между плечами.
+    */
+
+    const shoulderWidth =
+        distance(
+            leftShoulder,
+            rightShoulder
+        );
+
+
+    /*
+        Расстояние от плеч до запястий.
+        Используем как дополнительный показатель
+        положения тела.
+    */
+
+    const wristDistance =
+        (
+            distance(leftShoulder, leftWrist) +
+            distance(rightShoulder, rightWrist)
+        ) / 2;
+
+
+    /*
+        ЛОГИКА ОТЖИМАНИЯ
+
+        Когда руки почти прямые:
+            > 150 градусов
+
+        Когда руки согнуты:
+            < 105 градусов
+    */
+
+
+    if (elbowAngle > 150) {
+
+        if (state === "DOWN") {
+
+            const now = Date.now();
+
+            /*
+                Защита от двойного счёта
+            */
+
+            if (now - lastRepTime > 700) {
+
+                counter++;
+
+                counterElement.textContent =
+                    counter;
+
+                lastRepTime = now;
+            }
+
+            state = "UP";
+        }
+
+        statusElement.textContent =
+            "⬆️ Вверх";
+
+        statusElement.className = "up";
+
+    }
+
+    else if (elbowAngle < 105) {
+
+        state = "DOWN";
+
+        statusElement.textContent =
+            "⬇️ Вниз";
+
+        statusElement.className = "down";
+    }
+
+    else {
+
+        statusElement.textContent =
+            "Готово";
+
+        statusElement.className =
+            "ready";
+    }
+
+});
+
+
+/*
+    Запуск камеры
+*/
+
+async function startCamera() {
+
+    if (cameraStarted)
+        return;
+
+    try {
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video: {
+                    facingMode: "user",
+                    width: {
+                        ideal: 1280
+                    },
+                    height: {
+                        ideal: 720
+                    }
+                },
+
+                audio: false
+            });
+
+        video.srcObject = stream;
+
+        cameraStarted = true;
+
+        statusElement.textContent =
+            "Камера запущена";
+
+        processVideo();
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusElement.textContent =
+            "Не удалось получить доступ к камере";
+    }
+}
+
+
+/*
+    Постоянно отправляем кадры в MediaPipe
+*/
+
+async function processVideo() {
+
+    if (video.readyState >= 2) {
+
+        await pose.send({
+            image: video
+        });
+    }
+
+    requestAnimationFrame(processVideo);
+}
+
+
+/*
+    Сброс
+*/
+
+function resetCounter() {
+
+    counter = 0;
+    state = "UP";
+
+    counterElement.textContent =
+        "0";
+
+    statusElement.textContent =
+        "Счётчик сброшен";
+}
+
+</script>
+
+</body>
+</html>
