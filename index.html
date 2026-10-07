@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>REP — Earn Your Screen Time</title>
+  <meta name="version" content="REP FINAL 1.0">
 
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -134,6 +135,7 @@ transform:translate(-50%,20px);opacity:0;background:#f1f5f2;color:#0a0d0b;paddin
 transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:translate(-50%,0);opacity:1}
 @media(max-width:480px){.exercise-grid{grid-template-columns:1fr 1fr}.exercise:last-child{grid-column:1/-1;min-height:92px}.exercise:last-child .exercise-icon{margin-bottom:10px}}
 </style>
+<style>button, .exercise, .primary { user-select:none; } video { background:#000; }</style>
 </head>
 
 <body>
@@ -233,6 +235,7 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
       <video id="video" playsinline muted></video>
       <canvas id="poseCanvas"></canvas>
       <div class="camera-shade"></div>
+      <div id="boxGrid" class="box-grid" style="display:none"></div>
       <div id="boxRound" class="box-round" style="display:none">REACTION ROUND</div>
       <div id="boxScore" class="box-score" style="display:none">SCORE <span>0</span></div>
       <div id="boxMessage" class="box-message"></div>
@@ -312,9 +315,11 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
   let boxTarget = null;
   let boxScore = 0;
   let boxHits = 0;
-  let boxRoundTimer = null;
   let boxSpawnTimer = null;
   let boxActive = false;
+  let hands = null;
+  let lastHandFrame = 0;
+  let lastHitAt = 0;
 
   const $ = (id) => document.getElementById(id);
 
@@ -398,7 +403,6 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
     const visible = (...ids) => ids.every(i => L(i) && (L(i).visibility ?? 1) > .45);
 
     if (selectedExercise === "boxing") {
-      processBoxingPose(p);
       return;
     }
 
@@ -463,52 +467,115 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
 
     const target = document.createElement("div");
     target.className = "box-target";
-    const marginX = Math.max(70, innerWidth * .12);
-    const marginY = Math.max(125, innerHeight * .16);
-    const x = marginX + Math.random() * Math.max(20, innerWidth - marginX*2 - 76);
-    const y = marginY + Math.random() * Math.max(20, innerHeight - marginY*2 - 76);
+
+    const marginX = Math.max(72, innerWidth * .10);
+    const marginY = Math.max(135, innerHeight * .15);
+    const x = marginX + Math.random() * Math.max(20, innerWidth - marginX * 2 - 84);
+    const y = marginY + Math.random() * Math.max(20, innerHeight - marginY * 2 - 84);
+
     target.style.left = `${x}px`;
     target.style.top = `${y}px`;
     $("workout").querySelector(".workout").appendChild(target);
-    boxTarget = {el:target, x:x+38, y:y+38};
+    boxTarget = {el: target, x: x + 42, y: y + 42};
   }
 
-  function processBoxingPose(p) {
-    const hands = [p[15], p[16]].filter(x => x && (x.visibility ?? 1) > .45);
-    if (!boxActive || !boxTarget || !hands.length) return;
+  function handleBoxHands(results) {
+    if (!boxActive || !boxTarget || !results.multiHandLandmarks) return;
 
-    // Canvas landmarks are normalized. Convert to viewport coordinates.
-    for (const hand of hands) {
-      const x = innerWidth * (1 - hand.x);
-      const y = innerHeight * hand.y;
-      const d = Math.hypot(x-boxTarget.x, y-boxTarget.y);
+    const now = performance.now();
+    if (now - lastHitAt < 420) return;
 
-      if (d < 72) {
-        const targetEl = boxTarget.el;
-        targetEl.classList.add("hit");
-        boxScore += 100;
+    for (const hand of results.multiHandLandmarks) {
+      // Index fingertip (8) + wrist (0). The fingertip gives much more
+      // useful aiming precision than the Pose wrist landmark.
+      const tip = hand[8];
+      if (!tip) continue;
+
+      // Camera preview is mirrored, so x is inverted for the screen.
+      const x = innerWidth * (1 - tip.x);
+      const y = innerHeight * tip.y;
+      const distance = Math.hypot(x - boxTarget.x, y - boxTarget.y);
+
+      if (distance < 68) {
+        lastHitAt = now;
         boxHits++;
+        boxScore += 100 + Math.min(100, boxHits * 2);
+
+        const target = boxTarget.el;
+        target.classList.add("hit");
         $("boxScore").querySelector("span").textContent = boxScore;
-        $("boxMessage").textContent = boxHits % 5 === 0 ? "COMBO" : "+100";
-        $("boxMessage").classList.remove("show");
-        void $("boxMessage").offsetWidth;
-        $("boxMessage").classList.add("show");
-        setTimeout(() => targetEl.remove(), 120);
+
+        const msg = $("boxMessage");
+        msg.textContent = boxHits % 5 === 0 ? "COMBO" : "+100";
+        msg.classList.remove("show");
+        void msg.offsetWidth;
+        msg.classList.add("show");
+
+        setTimeout(() => target.remove(), 120);
         boxTarget = null;
-        setTimeout(spawnBoxTarget, 160);
+
+        setTimeout(spawnBoxTarget, 180);
         break;
       }
     }
   }
 
-  function startBoxMode() {
+  async function initHands() {
+    if (hands) return true;
+    if (typeof Hands === "undefined") return false;
+
+    hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 1,
+      minDetectionConfidence: .55,
+      minTrackingConfidence: .55
+    });
+
+    hands.onResults(handleBoxHands);
+    return true;
+  }
+
+  async function handLoop() {
+    if (!boxActive || !hands || !$("video").srcObject) return;
+
+    const now = performance.now();
+    if (now - lastHandFrame > 55 && $("video").readyState >= 2) {
+      lastHandFrame = now;
+      try { await hands.send({image: $("video")}); } catch (e) {}
+    }
+    if (boxActive) requestAnimationFrame(handLoop);
+  }
+
+  async function startBoxMode() {
     boxActive = true;
     boxScore = 0;
     boxHits = 0;
+    lastHitAt = 0;
+
     $("boxScore").querySelector("span").textContent = "0";
     $("boxRound").style.display = "block";
     $("boxScore").style.display = "block";
+    $("boxGrid").style.display = "block";
+
+    let ready = await initHands();
+    if (!ready) {
+      await new Promise(r => setTimeout(r, 900));
+      ready = await initHands();
+    }
+    if (!ready) {
+      $("boxRound").textContent = "HAND TRACKING UNAVAILABLE";
+      toast("Трекинг рук не загрузился");
+    } else {
+      $("boxRound").textContent = "REACTION ROUND";
+      handLoop();
+    }
+
     spawnBoxTarget();
+
     boxSpawnTimer = setInterval(() => {
       if (boxActive && !boxTarget) spawnBoxTarget();
     }, 1300);
@@ -517,13 +584,15 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
   function stopBoxMode() {
     boxActive = false;
     clearInterval(boxSpawnTimer);
-    clearTimeout(boxRoundTimer);
     boxSpawnTimer = null;
+
     const target = document.querySelector(".box-target");
     if (target) target.remove();
+
     boxTarget = null;
     $("boxRound").style.display = "none";
     $("boxScore").style.display = "none";
+    $("boxGrid").style.display = "none";
   }
 
   async function startCamera() {
@@ -583,10 +652,17 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
 
     if (results.poseLandmarks) {
       drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
-        color: "#b7ff3c", lineWidth: 6, lineCap: "round", lineJoin: "round"
+        color: "#b7ff3c", lineWidth: 7, lineCap: "round", lineJoin: "round"
       });
-      drawLandmarks(ctx, results.poseLandmarks, {
-        color: "#ffffff", fillColor: "#b7ff3c", lineWidth: 2, radius: 4
+
+      const majorJoints = new Set([0,11,12,13,14,23,24,25,26,27,28]);
+      results.poseLandmarks.forEach((lm, i) => {
+        if (!lm || (lm.visibility ?? 1) < .4) return;
+        const radius = majorJoints.has(i) ? 7 : 3;
+        ctx.beginPath();
+        ctx.arc(lm.x * canvas.width, lm.y * canvas.height, radius, 0, Math.PI * 2);
+        ctx.fillStyle = majorJoints.has(i) ? "#b7ff3c" : "rgba(183,255,60,.55)";
+        ctx.fill();
       });
       processPose(results);
     }
