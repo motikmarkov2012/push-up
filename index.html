@@ -10,7 +10,6 @@
   <meta name="version" content="REP FINAL 1.0">
 
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
   <style>
 :root{
@@ -213,7 +212,7 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
               <path d="M5 17.5 10.5 12 8 9.5l2-2 3 3 2.5-2.5 3 3-2.5 2.5 3 3-2 2-3-3-5.5 5.5z"/>
             </svg>
           </div>
-          <div class="exercise-name">BX</div>
+          <div class="exercise-name">BOX</div>
           <div class="exercise-meta">Реакция и точность</div>
         </button>
       </div>
@@ -396,40 +395,99 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
 
   function processPose(results) {
     if (!results.poseLandmarks) return;
+
     lastPoseSeen = performance.now();
 
     const p = results.poseLandmarks;
     const L = (i) => p[i];
-    const visible = (...ids) => ids.every(i => L(i) && (L(i).visibility ?? 1) > .45);
 
     if (selectedExercise === "boxing") {
       return;
     }
 
+    /*
+      PUSH-UP ENGINE — adapted from the user's known-working version.
+
+      11 = left shoulder
+      12 = right shoulder
+      13 = left elbow
+      14 = right elbow
+      15 = left wrist
+      16 = right wrist
+    */
     if (selectedExercise === "pushup") {
-      if (!visible(11,12,13,14,15,16)) return;
+      const leftShoulder = L(11);
+      const rightShoulder = L(12);
+      const leftElbow = L(13);
+      const rightElbow = L(14);
+      const leftWrist = L(15);
+      const rightWrist = L(16);
 
-      const left = angle(L(11), L(13), L(15));
-      const right = angle(L(12), L(14), L(16));
-      const elbows = avg(left,right);
+      const visible =
+        leftShoulder && rightShoulder &&
+        leftElbow && rightElbow &&
+        leftWrist && rightWrist &&
+        (leftShoulder.visibility ?? 1) > 0.5 &&
+        (rightShoulder.visibility ?? 1) > 0.5 &&
+        (leftElbow.visibility ?? 1) > 0.5 &&
+        (rightElbow.visibility ?? 1) > 0.5 &&
+        (leftWrist.visibility ?? 1) > 0.5 &&
+        (rightWrist.visibility ?? 1) > 0.5;
 
-      // Front-facing prototype: average elbow flexion.
-      // DOWN -> UP counts one rep.
-      if (elbows < 100) pushupState = "down";
-      if (elbows > 150 && pushupState === "down") {
-        registerRep();
-        pushupState = "up";
+      if (!visible) {
+        return;
       }
-    } else {
-      if (!visible(23,24,25,26,27,28)) return;
+
+      const leftAngle = angle(
+        leftShoulder,
+        leftElbow,
+        leftWrist
+      );
+
+      const rightAngle = angle(
+        rightShoulder,
+        rightElbow,
+        rightWrist
+      );
+
+      const elbowAngle =
+        (leftAngle + rightAngle) / 2;
+
+      /*
+        The important part of the original working algorithm:
+
+        < 105°  = DOWN
+        > 150°  = UP
+        DOWN -> UP = one repetition
+      */
+      if (elbowAngle > 150) {
+        if (pushupState === "down") {
+          registerRep();
+          pushupState = "up";
+        }
+      } else if (elbowAngle < 105) {
+        pushupState = "down";
+      }
+    }
+
+    /*
+      SQUAT ENGINE stays separate so the proven push-up logic
+      does not affect the other exercise.
+    */
+    else if (selectedExercise === "squat") {
+      const visible = [23,24,25,26,27,28].every(
+        i => L(i) && (L(i).visibility ?? 1) > 0.5
+      );
+
+      if (!visible) return;
 
       const leftKnee = angle(L(23), L(25), L(27));
       const rightKnee = angle(L(24), L(26), L(28));
-      const knees = avg(leftKnee,rightKnee);
+      const knees = avg(leftKnee, rightKnee);
 
-      // Squat: standing -> lowered -> standing.
-      if (knees < 105) squatState = "down";
-      if (knees > 155 && squatState === "down") {
+      if (knees < 105) {
+        squatState = "down";
+      } else if (knees > 155 && squatState === "down") {
         registerRep();
         squatState = "up";
       }
@@ -626,8 +684,8 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
           modelComplexity: 1,
           smoothLandmarks: true,
           enableSegmentation: false,
-          minDetectionConfidence: .55,
-          minTrackingConfidence: .55
+          minDetectionConfidence: .5,
+          minTrackingConfidence: .5
         });
         pose.onResults(drawResults);
       }
@@ -677,7 +735,7 @@ transition:.23s;pointer-events:none;white-space:nowrap}.toast.show{transform:tra
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.strokeStyle = "#62c554";
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3.5;
 
     for (const [a,b] of SKELETON_CONNECTIONS) {
       const p1 = landmarks[a], p2 = landmarks[b];
