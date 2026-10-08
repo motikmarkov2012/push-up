@@ -1,222 +1,448 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>REP</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+<title>Push-Up</title>
 
 <style>
-*{box-sizing:border-box}
-
-body{
-    margin:0;
-    background:#080a09;
-    color:#fff;
-    font-family:Arial,sans-serif;
-    overflow-x:hidden;
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.app{
-    width:min(100%,900px);
-    margin:auto;
-    padding:22px 18px 40px;
+body {
+    margin: 0;
+    background: #070707;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    overflow-x: hidden;
 }
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:22px;
+/* =========================
+   APP
+========================= */
+
+.app {
+    min-height: 100vh;
+    width: 100%;
 }
 
-.logo{
-    font-size:28px;
-    font-weight:800;
-    letter-spacing:-1px;
+/* =========================
+   REGISTRATION
+========================= */
+
+.screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
 }
 
-.balance{
-    background:#111713;
-    border:1px solid #202a22;
-    border-radius:14px;
-    padding:10px 15px;
-    color:#62c554;
-    font-weight:700;
+.register-card {
+    width: 100%;
+    max-width: 430px;
 }
 
-.subtitle{
-    color:#777;
-    margin-top:-15px;
-    margin-bottom:22px;
+.logo {
+    text-align: center;
+    font-size: 46px;
+    margin-bottom: 8px;
 }
 
-.cards{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:12px;
-    margin-bottom:18px;
+.title {
+    text-align: center;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -1px;
 }
 
-.card{
-    background:#101311;
-    border:1px solid #202521;
-    border-radius:18px;
-    padding:18px 12px;
-    cursor:pointer;
-    transition:.15s;
+.subtitle {
+    text-align: center;
+    color: #858585;
+    margin-top: 8px;
+    margin-bottom: 34px;
 }
 
-.card.active{
-    border-color:#62c554;
-    box-shadow:0 0 0 1px #62c554;
+.input-label {
+    display: block;
+    color: #aaa;
+    font-size: 14px;
+    margin: 0 0 8px 4px;
 }
 
-.card:hover{
-    transform:translateY(-2px);
+input,
+select {
+    width: 100%;
+    height: 56px;
+    border: 1px solid #292929;
+    background: #141414;
+    color: white;
+    border-radius: 16px;
+    padding: 0 17px;
+    font-size: 17px;
+    outline: none;
+    margin-bottom: 18px;
 }
 
-.card-title{
-    font-size:17px;
-    font-weight:700;
+input:focus,
+select:focus {
+    border-color: #3b82f6;
 }
 
-.card-time{
-    margin-top:7px;
-    color:#62c554;
-    font-size:13px;
+.primary-button {
+    width: 100%;
+    height: 56px;
+    border: none;
+    border-radius: 17px;
+    background: #2563eb;
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
 }
 
-.camera{
-    position:relative;
-    width:100%;
-    aspect-ratio:16/9;
-    background:#050505;
-    border-radius:22px;
-    overflow:hidden;
-    border:1px solid #202521;
+.primary-button:active {
+    transform: scale(0.98);
 }
 
-video{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    transform:scaleX(-1);
+/* =========================
+   MAIN APP
+========================= */
+
+#mainScreen {
+    display: none;
+    min-height: 100vh;
+    padding-bottom: 30px;
 }
 
-#canvas{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    transform:scaleX(-1);
-    pointer-events:none;
-    z-index:5;
+.topbar {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
 }
 
-.camera-message{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#777;
-    z-index:2;
+.brand {
+    font-size: 21px;
+    font-weight: 800;
 }
 
-.controls{
-    display:flex;
-    gap:10px;
-    margin-top:14px;
+.profile-button {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid #292929;
+    background: #151515;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
 }
 
-button{
-    flex:1;
-    border:0;
-    border-radius:15px;
-    padding:15px;
-    color:#fff;
-    background:#62c554;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
+/* =========================
+   CAMERA
+========================= */
+
+.camera-container {
+    position: relative;
+    width: calc(100% - 24px);
+    max-width: 720px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 24px;
+    background: #111;
+    border: 1px solid #222;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
 }
 
-button.secondary{
-    background:#171b18;
-    border:1px solid #272d29;
+video {
+    width: 100%;
+    display: block;
+    transform: scaleX(-1);
 }
 
-button:active{
-    transform:scale(.98);
+canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+    pointer-events: none;
 }
 
-.status{
-    text-align:center;
-    min-height:25px;
-    margin-top:13px;
-    color:#888;
+/* =========================
+   COUNTER
+========================= */
+
+.counter-overlay {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    min-width: 86px;
+    height: 58px;
+
+    padding: 0 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0,0,0,.48);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+
+    font-size: 31px;
+    font-weight: 800;
+
+    transition:
+        transform .18s ease,
+        background .18s ease;
 }
 
-.rep{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%) scale(.7);
-    font-size:100px;
-    font-weight:900;
-    color:#62c554;
-    opacity:0;
-    pointer-events:none;
-    z-index:10;
+.counter-overlay.pop {
+    animation: counterPop .32s ease;
 }
 
-.rep.show{
-    animation:repPop .9s ease forwards;
-}
-
-@keyframes repPop{
-    0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}
-    20%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-    70%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-    100%{opacity:0;transform:translate(-50%,-50%) scale(1.08)}
-}
-
-.counter{
-    text-align:center;
-    font-size:68px;
-    font-weight:900;
-    margin-top:14px;
-}
-
-.profile{
-    margin-top:25px;
-    padding:18px;
-    background:#101311;
-    border:1px solid #202521;
-    border-radius:18px;
-}
-
-.profile-title{
-    color:#777;
-    font-size:13px;
-    margin-bottom:5px;
-}
-
-.profile-name{
-    font-size:21px;
-    font-weight:700;
-}
-
-@media(max-width:600px){
-    .cards{
-        grid-template-columns:1fr;
+@keyframes counterPop {
+    0% {
+        transform: translateX(-50%) scale(1);
     }
 
-    .counter{
-        font-size:55px;
+    45% {
+        transform: translateX(-50%) scale(1.18);
+        background: rgba(37,99,235,.75);
     }
+
+    100% {
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+/* =========================
+   +1 ANIMATION
+========================= */
+
+.rep-animation {
+    position: absolute;
+    left: 50%;
+    top: 88px;
+    transform: translateX(-50%);
+
+    font-size: 26px;
+    font-weight: 800;
+
+    opacity: 0;
+    pointer-events: none;
+
+    z-index: 11;
+}
+
+.rep-animation.show {
+    animation: repFloat .7s ease-out;
+}
+
+@keyframes repFloat {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 15px) scale(.8);
+    }
+
+    25% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -35px) scale(1.05);
+    }
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status {
+    text-align: center;
+    margin: 14px 0 12px;
+    color: #858585;
+    min-height: 22px;
+    font-size: 15px;
+}
+
+.status.ready {
+    color: #35e36f;
+}
+
+.status.down {
+    color: #ffd43b;
+}
+
+.status.up {
+    color: #35e36f;
+}
+
+/* =========================
+   CONTROLS
+========================= */
+
+.controls {
+    width: calc(100% - 30px);
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.main-button {
+    width: 100%;
+    height: 56px;
+    border: none;
+    border-radius: 17px;
+    background: #2563eb;
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.main-button.stop {
+    background: #242424;
+}
+
+.secondary-button {
+    width: 100%;
+    height: 48px;
+    border: 1px solid #292929;
+    border-radius: 15px;
+    background: #111;
+    color: #aaa;
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.stats {
+    width: calc(100% - 30px);
+    max-width: 720px;
+    margin: 18px auto 0;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat {
+    background: #111;
+    border: 1px solid #202020;
+    border-radius: 17px;
+    padding: 16px 8px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.stat-label {
+    color: #777;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* =========================
+   PROFILE PANEL
+========================= */
+
+.profile-panel {
+    display: none;
+
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    z-index: 100;
+    padding: 20px;
+
+    align-items: flex-end;
+}
+
+.profile-card {
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+
+    background: #151515;
+    border: 1px solid #292929;
+    border-radius: 25px;
+    padding: 24px;
+}
+
+.profile-card h2 {
+    margin-top: 0;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #252525;
+}
+
+.profile-row:last-child {
+    border-bottom: none;
+}
+
+.profile-row span:first-child {
+    color: #888;
+}
+
+.close-button {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 15px;
+    background: #292929;
+    color: white;
+    margin-top: 18px;
+    font-size: 16px;
+}
+
+/* =========================
+   HIDDEN
+========================= */
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   DESKTOP
+========================= */
+
+@media (min-width: 800px) {
+
+    .camera-container {
+        max-height: 75vh;
+    }
+
 }
 </style>
 </head>
@@ -225,345 +451,520 @@ button:active{
 
 <div class="app">
 
-    <div class="header">
-        <div class="logo">REP</div>
-        <div class="balance">
-            <span id="balance">0</span> мин
+<!-- =========================
+     REGISTRATION
+========================= -->
+
+<section id="registrationScreen" class="screen">
+
+    <div class="register-card">
+
+        <div class="logo">💪</div>
+
+        <div class="title">
+            Push-Up
         </div>
+
+        <div class="subtitle">
+            Твой персональный счётчик тренировок
+        </div>
+
+        <label class="input-label">
+            Как тебя зовут?
+        </label>
+
+        <input
+            id="nameInput"
+            type="text"
+            placeholder="Например, Матвей"
+            maxlength="30"
+        >
+
+        <label class="input-label">
+            Уровень подготовки
+        </label>
+
+        <select id="levelInput">
+            <option value="Новичок">Новичок</option>
+            <option value="Средний">Средний</option>
+            <option value="Продвинутый">Продвинутый</option>
+        </select>
+
+        <button
+            class="primary-button"
+            onclick="createProfile()"
+        >
+            Продолжить
+        </button>
+
     </div>
 
-    <div class="subtitle">
-        Earn Your Screen Time
-    </div>
+</section>
 
-    <div class="cards">
 
-        <div class="card active" id="pushupCard" onclick="selectExercise('pushup')">
-            <div class="card-title">Отжимания</div>
-            <div class="card-time">+1 мин / повтор</div>
+<!-- =========================
+     MAIN SCREEN
+========================= -->
+
+<section id="mainScreen">
+
+    <header class="topbar">
+
+        <div class="brand">
+            Push-Up
         </div>
 
-        <div class="card" id="squatCard" onclick="selectExercise('squat')">
-            <div class="card-title">Приседания</div>
-            <div class="card-time">+1 мин / повтор</div>
-        </div>
+        <button
+            class="profile-button"
+            onclick="openProfile()"
+            id="profileButton"
+        >
+            М
+        </button>
 
-        <div class="card" id="boxingCard" onclick="selectExercise('boxing')">
-            <div class="card-title">BOX</div>
-            <div class="card-time">Реакция</div>
-        </div>
+    </header>
 
-    </div>
 
-    <div class="camera">
+    <div class="camera-container">
 
-        <video id="video" autoplay muted playsinline></video>
+        <video
+            id="video"
+            autoplay
+            playsinline
+        ></video>
 
         <canvas id="canvas"></canvas>
 
-        <div class="camera-message" id="cameraMessage">
-            Нажми «Запустить»
+        <!-- COUNTER -->
+        <div
+            class="counter-overlay"
+            id="counter"
+        >
+            0
         </div>
 
-        <div class="rep" id="repAnimation">+1</div>
+        <!-- +1 -->
+        <div
+            class="rep-animation"
+            id="repAnimation"
+        >
+            +1
+        </div>
 
     </div>
 
-    <div class="counter" id="counter">0</div>
 
-    <div class="status" id="status">
-        Камера не запущена
+    <div
+        class="status"
+        id="status"
+    >
+        Нажми «Начать тренировку»
     </div>
+
 
     <div class="controls">
-        <button onclick="startCamera()">Запустить</button>
-        <button class="secondary" onclick="resetCounter()">Сброс</button>
+
+        <button
+            class="main-button"
+            id="startButton"
+            onclick="startWorkout()"
+        >
+            Начать тренировку
+        </button>
+
+        <button
+            class="secondary-button"
+            onclick="resetCounter()"
+        >
+            Сбросить результат
+        </button>
+
     </div>
 
-    <div class="profile">
-        <div class="profile-title">Профиль</div>
-        <div class="profile-name" id="profileName">REP User</div>
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <div
+                class="stat-value"
+                id="todayReps"
+            >
+                0
+            </div>
+
+            <div class="stat-label">
+                Сегодня
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div
+                class="stat-value"
+                id="bestReps"
+            >
+                0
+            </div>
+
+            <div class="stat-label">
+                Рекорд
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div
+                class="stat-value"
+                id="totalReps"
+            >
+                0
+            </div>
+
+            <div class="stat-label">
+                Всего
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     PROFILE
+========================= -->
+
+<div
+    class="profile-panel"
+    id="profilePanel"
+>
+
+    <div class="profile-card">
+
+        <h2>Профиль</h2>
+
+        <div class="profile-row">
+            <span>Имя</span>
+            <span id="profileName">—</span>
+        </div>
+
+        <div class="profile-row">
+            <span>Уровень</span>
+            <span id="profileLevel">—</span>
+        </div>
+
+        <div class="profile-row">
+            <span>Всего отжиманий</span>
+            <span id="profileTotal">0</span>
+        </div>
+
+        <button
+            class="close-button"
+            onclick="closeProfile()"
+        >
+            Закрыть
+        </button>
+
     </div>
 
 </div>
 
 
-<!-- MediaPipe Pose -->
+<!-- =========================
+     MEDIAPIPE
+========================= -->
+
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
 
 <script>
 
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+/* =====================================================
+   PROFILE
+===================================================== */
 
-const counterEl = document.getElementById("counter");
-const balanceEl = document.getElementById("balance");
-const statusEl = document.getElementById("status");
-const messageEl = document.getElementById("cameraMessage");
-const repAnimation = document.getElementById("repAnimation");
+let profile = JSON.parse(
+    localStorage.getItem("pushupProfile")
+);
 
-let counter = 0;
-let balance = Number(localStorage.getItem("repBalance") || 0);
+let totalReps =
+    Number(localStorage.getItem("pushupTotal") || 0);
 
-let selectedExercise = "pushup";
+let bestReps =
+    Number(localStorage.getItem("pushupBest") || 0);
 
-let pushupState = "up";
-let squatState = "up";
-
-let cameraStarted = false;
-let lastRepTime = 0;
-
-balanceEl.textContent = balance;
+let todayReps =
+    Number(localStorage.getItem("pushupToday") || 0);
 
 
-/* =========================
-   ПРОФИЛЬ
-========================= */
+/*
+    Проверяем профиль
+*/
 
-const savedName = localStorage.getItem("repName");
+if (profile) {
 
-if(savedName){
-    document.getElementById("profileName").textContent = savedName;
+    showMainScreen();
+
 }
 
 
-/* =========================
-   МАТЕМАТИКА
-========================= */
+/*
+    Создание профиля
+*/
 
-function distance(a,b){
+function createProfile() {
 
-    return Math.sqrt(
-        (a.x-b.x)**2 +
-        (a.y-b.y)**2
+    const name =
+        document.getElementById("nameInput")
+        .value
+        .trim();
+
+    const level =
+        document.getElementById("levelInput")
+        .value;
+
+    if (!name) {
+
+        alert("Введи своё имя");
+
+        return;
+    }
+
+
+    profile = {
+        name: name,
+        level: level
+    };
+
+
+    localStorage.setItem(
+        "pushupProfile",
+        JSON.stringify(profile)
     );
 
+
+    showMainScreen();
 }
 
 
-function angle(a,b,c){
+/*
+    Показываем приложение
+*/
+
+function showMainScreen() {
+
+    document.getElementById(
+        "registrationScreen"
+    ).style.display = "none";
+
+    document.getElementById(
+        "mainScreen"
+    ).style.display = "block";
+
+
+    updateProfileUI();
+    updateStats();
+}
+
+
+/*
+    Профиль
+*/
+
+function updateProfileUI() {
+
+    if (!profile)
+        return;
+
+    document.getElementById(
+        "profileButton"
+    ).textContent =
+        profile.name
+        .charAt(0)
+        .toUpperCase();
+
+    document.getElementById(
+        "profileName"
+    ).textContent =
+        profile.name;
+
+    document.getElementById(
+        "profileLevel"
+    ).textContent =
+        profile.level;
+
+    document.getElementById(
+        "profileTotal"
+    ).textContent =
+        totalReps;
+}
+
+
+/*
+    Статистика
+*/
+
+function updateStats() {
+
+    document.getElementById(
+        "todayReps"
+    ).textContent =
+        todayReps;
+
+    document.getElementById(
+        "bestReps"
+    ).textContent =
+        bestReps;
+
+    document.getElementById(
+        "totalReps"
+    ).textContent =
+        totalReps;
+}
+
+
+/*
+    Профильная панель
+*/
+
+function openProfile() {
+
+    document.getElementById(
+        "profilePanel"
+    ).style.display = "flex";
+
+    updateProfileUI();
+}
+
+
+function closeProfile() {
+
+    document.getElementById(
+        "profilePanel"
+    ).style.display = "none";
+}
+
+
+/* =====================================================
+   CAMERA + POSE
+   ТЕХНИЧЕСКАЯ ЧАСТЬ СОХРАНЕНА
+===================================================== */
+
+const video =
+    document.getElementById("video");
+
+const canvas =
+    document.getElementById("canvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+const counterElement =
+    document.getElementById("counter");
+
+const statusElement =
+    document.getElementById("status");
+
+const repAnimation =
+    document.getElementById("repAnimation");
+
+const startButton =
+    document.getElementById("startButton");
+
+
+let counter = 0;
+let state = "UP";
+
+let cameraStarted = false;
+let workoutStarted = false;
+
+let lastRepTime = 0;
+
+
+/*
+    Расстояние
+*/
+
+function distance(a, b) {
+
+    return Math.sqrt(
+        Math.pow(a.x - b.x, 2) +
+        Math.pow(a.y - b.y, 2)
+    );
+}
+
+
+/*
+    Угол
+*/
+
+function angle(a, b, c) {
 
     const ab = {
-        x:a.x-b.x,
-        y:a.y-b.y
+        x: a.x - b.x,
+        y: a.y - b.y
     };
 
     const cb = {
-        x:c.x-b.x,
-        y:c.y-b.y
+        x: c.x - b.x,
+        y: c.y - b.y
     };
 
     const dot =
-        ab.x*cb.x +
-        ab.y*cb.y;
+        ab.x * cb.x +
+        ab.y * cb.y;
 
     const magAB =
         Math.sqrt(
-            ab.x**2 +
-            ab.y**2
+            ab.x ** 2 +
+            ab.y ** 2
         );
 
     const magCB =
         Math.sqrt(
-            cb.x**2 +
-            cb.y**2
+            cb.x ** 2 +
+            cb.y ** 2
         );
 
-    if(!magAB || !magCB)
+    if (
+        magAB === 0 ||
+        magCB === 0
+    ) {
         return 180;
+    }
 
     let cos =
-        dot/(magAB*magCB);
+        dot /
+        (magAB * magCB);
 
-    cos = Math.max(-1,Math.min(1,cos));
+    cos =
+        Math.max(
+            -1,
+            Math.min(1, cos)
+        );
 
-    return Math.acos(cos)*180/Math.PI;
+    return Math.acos(cos)
+        * 180 / Math.PI;
 }
 
-
-/* =========================
-   СКЕЛЕТ
-========================= */
 
 /*
-MediaPipe Pose landmarks
-
-0 nose
-
-11 left shoulder
-12 right shoulder
-
-13 left elbow
-14 right elbow
-
-15 left wrist
-16 right wrist
-
-23 left hip
-24 right hip
-
-25 left knee
-26 right knee
-
-27 left ankle
-28 right ankle
+    MediaPipe
 */
-
-const CONNECTIONS = [
-
-    [0,1],
-    [1,2],
-    [2,3],
-    [3,7],
-
-    [0,4],
-    [4,5],
-    [5,6],
-    [6,8],
-
-    [9,10],
-
-    [11,12],
-
-    [11,13],
-    [13,15],
-
-    [12,14],
-    [14,16],
-
-    [11,23],
-    [12,24],
-
-    [23,24],
-
-    [23,25],
-    [25,27],
-
-    [24,26],
-    [26,28],
-
-    [27,29],
-    [29,31],
-
-    [28,30],
-    [30,32]
-];
-
-
-function drawSkeleton(points){
-
-    if(!points) return;
-
-    /*
-    ЛИНИИ
-    */
-
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.lineWidth = 3.5;
-    ctx.strokeStyle = "#62c554";
-
-    for(const connection of CONNECTIONS){
-
-        const a = points[connection[0]];
-        const b = points[connection[1]];
-
-        if(!a || !b) continue;
-
-        if(
-            (a.visibility ?? 1) < .35 ||
-            (b.visibility ?? 1) < .35
-        ) continue;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            a.x * canvas.width,
-            a.y * canvas.height
-        );
-
-        ctx.lineTo(
-            b.x * canvas.width,
-            b.y * canvas.height
-        );
-
-        ctx.stroke();
-    }
-
-
-    /*
-    ТОЧКИ
-    */
-
-    for(let i=0;i<points.length;i++){
-
-        const p = points[i];
-
-        if(!p) continue;
-
-        if((p.visibility ?? 1) < .35)
-            continue;
-
-        const x = p.x * canvas.width;
-        const y = p.y * canvas.height;
-
-        let radius = 4;
-
-        /*
-        Основные суставы крупнее
-        */
-
-        if([
-            11,12,
-            13,14,
-            15,16,
-            23,24,
-            25,26,
-            27,28
-        ].includes(i)){
-            radius = 6;
-        }
-
-        /*
-        Пальцы/мелкие точки меньше
-        */
-
-        if(i >= 29){
-            radius = 2.5;
-        }
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x,
-            y,
-            radius,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fillStyle =
-            i >= 29
-            ? "#62c554"
-            : "#ffffff";
-
-        ctx.fill();
-    }
-}
-
-
-/* =========================
-   MEDIAPIPE
-========================= */
 
 const pose = new Pose({
 
-    locateFile:(file)=>{
+    locateFile: (file) => {
 
-        return `
-        https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}
-        `;
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
 
     }
 
@@ -572,41 +973,34 @@ const pose = new Pose({
 
 pose.setOptions({
 
-    modelComplexity:1,
+    modelComplexity: 1,
 
-    smoothLandmarks:true,
+    smoothLandmarks: true,
 
-    enableSegmentation:false,
+    enableSegmentation: false,
 
-    minDetectionConfidence:.5,
+    minDetectionConfidence: 0.5,
 
-    minTrackingConfidence:.5
+    minTrackingConfidence: 0.5
 
 });
 
 
-pose.onResults(results=>{
+/*
+    Результаты MediaPipe
+*/
 
-    /*
-    Canvas всегда под размер камеры
-    */
+pose.onResults(results => {
 
-    if(video.videoWidth && video.videoHeight){
+    if (!results.poseLandmarks)
+        return;
 
-        if(
-            canvas.width !== video.videoWidth ||
-            canvas.height !== video.videoHeight
-        ){
 
-            canvas.width =
-                video.videoWidth;
+    canvas.width =
+        video.videoWidth;
 
-            canvas.height =
-                video.videoHeight;
-
-        }
-
-    }
+    canvas.height =
+        video.videoHeight;
 
 
     ctx.clearRect(
@@ -618,327 +1012,350 @@ pose.onResults(results=>{
 
 
     /*
-    ВОТ ЗДЕСЬ РИСУЕТСЯ СКЕЛЕТ
+        Скелет
     */
 
-    if(results.poseLandmarks){
-
-        drawSkeleton(
-            results.poseLandmarks
-        );
-
-        statusEl.textContent =
-            "Тело распознано";
-
-        statusEl.style.color =
-            "#62c554";
-
-        messageEl.style.display =
-            "none";
-
-    }else{
-
-        statusEl.textContent =
-            "Ищем человека";
-
-        statusEl.style.color =
-            "#888";
-
-    }
+    drawConnectors(
+        ctx,
+        results.poseLandmarks,
+        POSE_CONNECTIONS,
+        {
+            color: "#00ff66",
+            lineWidth: 4
+        }
+    );
 
 
-    if(!results.poseLandmarks)
-        return;
+    drawLandmarks(
+        ctx,
+        results.poseLandmarks,
+        {
+            color: "#ffffff",
+            lineWidth: 2,
+            radius: 5
+        }
+    );
 
 
     const p =
         results.poseLandmarks;
 
 
-    /* =========================
-       ОТЖИМАНИЯ
-    ========================= */
+    const leftShoulder =
+        p[11];
 
-    if(selectedExercise === "pushup"){
+    const rightShoulder =
+        p[12];
 
-        const leftShoulder = p[11];
-        const rightShoulder = p[12];
+    const leftElbow =
+        p[13];
 
-        const leftElbow = p[13];
-        const rightElbow = p[14];
+    const rightElbow =
+        p[14];
 
-        const leftWrist = p[15];
-        const rightWrist = p[16];
+    const leftWrist =
+        p[15];
 
-
-        const visible =
-
-            leftShoulder.visibility > .5 &&
-            rightShoulder.visibility > .5 &&
-
-            leftElbow.visibility > .5 &&
-            rightElbow.visibility > .5 &&
-
-            leftWrist.visibility > .5 &&
-            rightWrist.visibility > .5;
+    const rightWrist =
+        p[16];
 
 
-        if(!visible){
-
-            statusEl.textContent =
-                "Встань дальше от камеры";
-
-            return;
-
-        }
-
-
-        const leftAngle =
-            angle(
-                leftShoulder,
-                leftElbow,
-                leftWrist
-            );
+    const visible =
+        leftShoulder.visibility > 0.5 &&
+        rightShoulder.visibility > 0.5 &&
+        leftElbow.visibility > 0.5 &&
+        rightElbow.visibility > 0.5 &&
+        leftWrist.visibility > 0.5 &&
+        rightWrist.visibility > 0.5;
 
 
-        const rightAngle =
-            angle(
-                rightShoulder,
-                rightElbow,
-                rightWrist
-            );
+    if (!visible) {
 
+        statusElement.textContent =
+            "Встань дальше от камеры";
 
-        const elbowAngle =
-            (leftAngle + rightAngle) / 2;
+        statusElement.className =
+            "status";
 
-
-        /*
-        РАБОЧАЯ ЛОГИКА ИЗ ТВОЕГО КОДА
-
-        <105 = вниз
-
-        >150 = вверх
-
-        вниз -> вверх = повтор
-        */
-
-        if(elbowAngle > 150){
-
-            if(pushupState === "down"){
-
-                registerRep();
-
-                pushupState = "up";
-
-            }
-
-        }
-
-        else if(elbowAngle < 105){
-
-            pushupState = "down";
-
-        }
-
+        return;
     }
 
 
-    /* =========================
-       ПРИСЕДАНИЯ
-    ========================= */
-
-    if(selectedExercise === "squat"){
-
-        const visible = [
-
-            23,24,
-            25,26,
-            27,28
-
-        ].every(i =>
-            p[i] &&
-            (p[i].visibility ?? 1) > .5
+    const leftAngle =
+        angle(
+            leftShoulder,
+            leftElbow,
+            leftWrist
         );
 
 
-        if(!visible)
-            return;
+    const rightAngle =
+        angle(
+            rightShoulder,
+            rightElbow,
+            rightWrist
+        );
 
 
-        const leftKnee =
-            angle(
-                p[23],
-                p[25],
-                p[27]
-            );
+    const elbowAngle =
+        (leftAngle + rightAngle) / 2;
 
 
-        const rightKnee =
-            angle(
-                p[24],
-                p[26],
-                p[28]
-            );
+    /*
+        Если тренировка ещё не начата,
+        только показываем готовность.
+    */
+
+    if (!workoutStarted) {
+
+        statusElement.textContent =
+            "Готов к тренировке";
+
+        statusElement.className =
+            "status ready";
+
+        return;
+    }
 
 
-        const kneeAngle =
-            (leftKnee + rightKnee) / 2;
+    /*
+        Логика отжимания
+    */
+
+    if (elbowAngle > 150) {
+
+        if (state === "DOWN") {
+
+            const now =
+                Date.now();
 
 
-        if(kneeAngle < 105){
+            if (
+                now - lastRepTime >
+                700
+            ) {
 
-            squatState = "down";
+                counter++;
 
+                counterElement.textContent =
+                    counter;
+
+                lastRepTime =
+                    now;
+
+
+                /*
+                    Анимация +1
+                */
+
+                showRepAnimation();
+
+
+                /*
+                    Обновляем статистику
+                */
+
+                todayReps++;
+                totalReps++;
+
+
+                if (
+                    counter >
+                    bestReps
+                ) {
+
+                    bestReps =
+                        counter;
+
+                }
+
+
+                localStorage.setItem(
+                    "pushupToday",
+                    todayReps
+                );
+
+                localStorage.setItem(
+                    "pushupTotal",
+                    totalReps
+                );
+
+                localStorage.setItem(
+                    "pushupBest",
+                    bestReps
+                );
+
+
+                updateStats();
+                updateProfileUI();
+
+            }
+
+            state = "UP";
         }
 
-        else if(
-            kneeAngle > 155 &&
-            squatState === "down"
-        ){
 
-            registerRep();
+        statusElement.textContent =
+            "⬆️ Вверх";
 
-            squatState = "up";
+        statusElement.className =
+            "status up";
 
-        }
+    }
+
+    else if (elbowAngle < 105) {
+
+        state = "DOWN";
+
+        statusElement.textContent =
+            "⬇️ Вниз";
+
+        statusElement.className =
+            "status down";
+
+    }
+
+    else {
+
+        statusElement.textContent =
+            "Двигайся";
+
+        statusElement.className =
+            "status";
 
     }
 
 });
 
 
-/* =========================
-   +1 ПОВТОР
-========================= */
+/*
+    Анимация повторения
+*/
 
-function registerRep(){
+function showRepAnimation() {
 
-    const now = Date.now();
-
-    if(now-lastRepTime < 700)
-        return;
-
-    lastRepTime = now;
-
-    counter++;
-
-    counterEl.textContent =
-        counter;
+    repAnimation.classList.remove(
+        "show"
+    );
 
 
-    /*
-    +1 минута
-    */
-
-    balance++;
-
-    balanceEl.textContent =
-        balance;
-
-    localStorage.setItem(
-        "repBalance",
-        balance
+    counterElement.classList.remove(
+        "pop"
     );
 
 
     /*
-    Анимация +1
+        Перезапуск CSS animation
     */
 
-    repAnimation.classList.remove("show");
-
     void repAnimation.offsetWidth;
+    void counterElement.offsetWidth;
 
-    repAnimation.classList.add("show");
 
+    repAnimation.classList.add(
+        "show"
+    );
+
+    counterElement.classList.add(
+        "pop"
+    );
 }
 
 
-/* =========================
-   ВЫБОР УПРАЖНЕНИЯ
-========================= */
+/*
+    Запуск тренировки
+*/
 
-function selectExercise(exercise){
+async function startWorkout() {
 
-    selectedExercise =
-        exercise;
-
-
-    document
-        .querySelectorAll(".card")
-        .forEach(card =>
-            card.classList.remove("active")
-        );
+    workoutStarted = true;
 
 
-    if(exercise === "pushup"){
+    startButton.textContent =
+        "Завершить тренировку";
 
-        document
-            .getElementById("pushupCard")
-            .classList.add("active");
-
-        statusEl.textContent =
-            "Готов к отжиманиям";
-
-    }
+    startButton.classList.add(
+        "stop"
+    );
 
 
-    if(exercise === "squat"){
+    startButton.onclick =
+        finishWorkout;
 
-        document
-            .getElementById("squatCard")
-            .classList.add("active");
 
-        statusEl.textContent =
-            "Готов к приседаниям";
+    if (!cameraStarted) {
+
+        await startCamera();
 
     }
 
 
-    if(exercise === "boxing"){
-
-        document
-            .getElementById("boxingCard")
-            .classList.add("active");
-
-        statusEl.textContent =
-            "BOX скоро";
-
-    }
-
+    statusElement.textContent =
+        "Готово. Начинай!";
 }
 
 
-/* =========================
-   КАМЕРА
-========================= */
+/*
+    Завершение
+*/
 
-async function startCamera(){
+function finishWorkout() {
 
-    if(cameraStarted)
+    workoutStarted = false;
+
+
+    startButton.textContent =
+        "Начать тренировку";
+
+    startButton.classList.remove(
+        "stop"
+    );
+
+
+    startButton.onclick =
+        startWorkout;
+
+
+    statusElement.textContent =
+        `Тренировка завершена: ${counter}`;
+
+
+    statusElement.className =
+        "status ready";
+}
+
+
+/*
+    Камера
+*/
+
+async function startCamera() {
+
+    if (cameraStarted)
         return;
 
 
-    try{
+    try {
 
         const stream =
-            await navigator.mediaDevices.getUserMedia({
+            await navigator.mediaDevices
+            .getUserMedia({
 
-                video:{
-                    facingMode:"user",
+                video: {
 
-                    width:{
-                        ideal:1280
+                    facingMode: "user",
+
+                    width: {
+                        ideal: 1280
                     },
 
-                    height:{
-                        ideal:720
+                    height: {
+                        ideal: 720
                     }
 
                 },
 
-                audio:false
+                audio: false
 
             });
 
@@ -951,57 +1368,38 @@ async function startCamera(){
             true;
 
 
-        await video.play();
-
-
-        messageEl.style.display =
-            "none";
-
-
-        statusEl.textContent =
-            "Ищем человека";
+        statusElement.textContent =
+            "Камера запущена";
 
 
         processVideo();
 
 
-    }catch(error){
+    } catch (error) {
 
         console.error(error);
 
-        statusEl.textContent =
-            "Нет доступа к камере";
+
+        statusElement.textContent =
+            "Не удалось получить доступ к камере";
 
     }
-
 }
 
 
-/* =========================
-   КАДРЫ
-========================= */
+/*
+    Обработка видео
+*/
 
-async function processVideo(){
+async function processVideo() {
 
-    if(
-        cameraStarted &&
+    if (
         video.readyState >= 2
-    ){
+    ) {
 
-        try{
-
-            await pose.send({
-                image:video
-            });
-
-        }catch(error){
-
-            console.error(
-                "Pose:",
-                error
-            );
-
-        }
+        await pose.send({
+            image: video
+        });
 
     }
 
@@ -1009,31 +1407,34 @@ async function processVideo(){
     requestAnimationFrame(
         processVideo
     );
-
 }
 
 
-/* =========================
-   СБРОС
-========================= */
+/*
+    Сброс текущей тренировки
+*/
 
-function resetCounter(){
+function resetCounter() {
 
     counter = 0;
 
-    pushupState = "up";
+    state = "UP";
 
-    squatState = "up";
-
-    counterEl.textContent =
+    counterElement.textContent =
         "0";
 
-    statusEl.textContent =
+
+    statusElement.textContent =
         "Счётчик сброшен";
 
+    statusElement.className =
+        "status";
 }
 
 </script>
 
+</div>
+
 </body>
 </html>
+```
