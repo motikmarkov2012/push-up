@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -15,229 +14,45 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    -webkit-tap-highlight-color: transparent;
 }
 
-body {
-    background: #080b09;
-    color: white;
-    font-family: Arial, Helvetica, sans-serif;
-    min-height: 100vh;
+html, body {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+    background: #000;
 }
 
-button,
-input,
-select {
-    font: inherit;
-}
-
-/* =========================
-   START
-========================= */
-
-#startScreen {
-    min-height: 100vh;
+#start {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    background: #000;
 }
 
-.startBox {
-    width: min(100%, 380px);
-    text-align: center;
-}
-
-.logo {
-    font-size: 58px;
-    font-weight: 900;
-    letter-spacing: -4px;
-    margin-bottom: 18px;
-}
-
-.tag {
-    display: inline-block;
-    padding: 11px 19px;
-    border-radius: 999px;
-    background: #101711;
-    border: 1px solid #29382d;
-    color: #bdc9c0;
-    font-size: 15px;
-    margin-bottom: 42px;
-}
-
-input,
-select {
-    width: 100%;
-    height: 56px;
-    background: #111612;
-    border: 1px solid #29352d;
-    color: white;
-    border-radius: 17px;
-    padding: 0 18px;
-    outline: none;
-    margin-bottom: 12px;
-}
-
-input:focus,
-select:focus {
-    border-color: #48e879;
-}
-
-select {
-    appearance: none;
-}
-
-.mainButton {
-    width: 100%;
-    height: 58px;
+#startButton {
+    width: 220px;
+    height: 64px;
     border: none;
     border-radius: 18px;
     background: #42e875;
     color: #061008;
+    font-size: 20px;
     font-weight: 800;
     cursor: pointer;
-    margin-top: 8px;
 }
 
-.mainButton:active {
-    transform: scale(.98);
+#startButton:active {
+    transform: scale(.97);
 }
 
-/* =========================
-   HOME
-========================= */
-
-#home {
-    display: none;
-    min-height: 100vh;
-    padding: 25px;
-    overflow-y: auto;
-}
-
-.homeInner {
-    width: min(100%, 600px);
-    margin: auto;
-}
-
-.homeHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.homeLogo {
-    font-size: 30px;
-    font-weight: 900;
-    letter-spacing: -2px;
-}
-
-.profileButton {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid #29382d;
-    background: #111711;
-    color: #42e875;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.greeting {
-    margin-bottom: 22px;
-}
-
-.greeting small {
-    color: #839188;
-    font-size: 14px;
-}
-
-.greeting h1 {
-    font-size: 34px;
-    margin-top: 5px;
-    letter-spacing: -1px;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 25px;
-}
-
-.stat {
-    background: #101510;
-    border: 1px solid #253128;
-    border-radius: 18px;
-    padding: 17px 12px;
-}
-
-.statValue {
-    font-size: 25px;
-    font-weight: 800;
-}
-
-.statName {
-    color: #78847c;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.sectionTitle {
-    font-size: 18px;
-    margin-bottom: 12px;
-}
-
-.exerciseGrid {
-    display: grid;
-    gap: 12px;
-}
-
-.exercise {
-    width: 100%;
-    min-height: 105px;
-    border: 1px solid #29352d;
-    border-radius: 22px;
-    background: #111711;
-    color: white;
-    text-align: left;
-    padding: 20px;
-    cursor: pointer;
-    transition: .15s;
-}
-
-.exercise:active {
-    transform: scale(.98);
-}
-
-.exerciseIcon {
-    font-size: 25px;
-    margin-bottom: 9px;
-}
-
-.exerciseName {
-    font-size: 19px;
-    font-weight: 750;
-}
-
-.exerciseDescription {
-    color: #7e8b82;
-    font-size: 13px;
-    margin-top: 4px;
-}
-
-/* =========================
-   WORKOUT
-========================= */
-
-#workout {
+#camera {
     display: none;
     position: fixed;
     inset: 0;
-    background: black;
-    z-index: 100;
+    background: #000;
 }
 
 #video {
@@ -257,588 +72,88 @@ select {
     transform: scaleX(-1);
 }
 
-.workoutTop {
+#counter {
     position: absolute;
-    top: 24px;
-    left: 0;
-    right: 0;
-    z-index: 5;
-    display: flex;
-    justify-content: center;
-    pointer-events: none;
-}
-
-.counter {
-    font-size: 55px;
-    font-weight: 900;
-    line-height: 1;
-    text-shadow: 0 3px 15px rgba(0,0,0,.7);
-}
-
-.counter.pop {
-    animation: pop .25s ease;
-}
-
-@keyframes pop {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.3);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-.exerciseLabel {
-    position: absolute;
-    top: 88px;
+    top: 25px;
     left: 0;
     right: 0;
     text-align: center;
-    color: rgba(255,255,255,.8);
-    font-size: 14px;
-    z-index: 5;
+    color: white;
+    font-size: 52px;
+    font-weight: 900;
+    text-shadow: 0 3px 15px #000;
+    z-index: 10;
 }
 
-.exitButton {
+#exit {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 10;
     width: 45px;
     height: 45px;
+    border: 1px solid rgba(255,255,255,.25);
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.2);
-    background: rgba(0,0,0,.45);
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-}
-
-.cameraHint {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
     background: rgba(0,0,0,.5);
-    border: 1px solid rgba(255,255,255,.12);
-    padding: 10px 16px;
-    border-radius: 999px;
-    color: rgba(255,255,255,.8);
-    font-size: 13px;
-    white-space: nowrap;
-    z-index: 5;
-}
-
-/* =========================
-   RESULT
-========================= */
-
-#result {
-    display: none;
-    min-height: 100vh;
-    align-items: center;
-    justify-content: center;
-    padding: 25px;
-}
-
-.resultBox {
-    width: min(100%, 400px);
-    text-align: center;
-}
-
-.resultTitle {
-    font-size: 42px;
-    font-weight: 900;
-    margin-bottom: 12px;
-}
-
-.resultNumber {
-    font-size: 85px;
-    font-weight: 900;
-    color: #42e875;
-    line-height: 1;
-    margin: 20px 0;
-}
-
-.resultText {
-    color: #89958d;
-    margin-bottom: 30px;
-}
-
-/* =========================
-   PROFILE
-========================= */
-
-#profile {
-    display: none;
-    min-height: 100vh;
-    padding: 25px;
-}
-
-.profileInner {
-    width: min(100%, 500px);
-    margin: auto;
-}
-
-.backButton {
-    border: none;
-    background: transparent;
-    color: #42e875;
-    cursor: pointer;
-    margin-bottom: 30px;
-}
-
-.profileCard {
-    background: #101510;
-    border: 1px solid #263229;
-    border-radius: 25px;
-    padding: 25px;
-}
-
-.profileAvatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: #42e875;
-    color: #061008;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 27px;
-    font-weight: 900;
-    margin-bottom: 18px;
-}
-
-.profileName {
-    font-size: 28px;
-    font-weight: 800;
-}
-
-.profileLevel {
-    color: #7f8b82;
-    margin-top: 5px;
-}
-
-.resetButton {
-    width: 100%;
-    height: 52px;
-    margin-top: 20px;
-    background: #181d19;
-    border: 1px solid #303a32;
-    border-radius: 15px;
-    color: #ff7777;
-    cursor: pointer;
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 500px) {
-    .logo {
-        font-size: 50px;
-    }
-
-    .counter {
-        font-size: 48px;
-    }
-
-    .stats {
-        gap: 7px;
-    }
+    color: white;
+    font-size: 24px;
+    z-index: 20;
 }
 </style>
 </head>
 
 <body>
 
-<!-- =========================
-     START SCREEN
-========================= -->
+<div id="start">
+    <button id="startButton">Запустить</button>
+</div>
 
-<section id="startScreen">
-    <div class="startBox">
-
-        <div class="logo">PUSH.</div>
-
-        <div class="tag">Дави и радуйся.</div>
-
-        <input
-            id="nameInput"
-            type="text"
-            placeholder="Имя"
-            maxlength="20"
-        >
-
-        <select id="levelInput">
-            <option value="Новичок">Новичок</option>
-            <option value="Средний">Средний</option>
-            <option value="Продвинутый">Продвинутый</option>
-        </select>
-
-        <button class="mainButton" onclick="createProfile()">
-            Начать
-        </button>
-
-    </div>
-</section>
-
-
-<!-- =========================
-     HOME
-========================= -->
-
-<section id="home">
-
-    <div class="homeInner">
-
-        <header class="homeHeader">
-            <div class="homeLogo">PUSH.</div>
-
-            <button class="profileButton" onclick="openProfile()" id="profileButton">
-                М
-            </button>
-        </header>
-
-        <div class="greeting">
-            <small>Готов?</small>
-            <h1 id="greetingName">Матвей</h1>
-        </div>
-
-        <div class="stats">
-
-            <div class="stat">
-                <div class="statValue" id="totalStat">0</div>
-                <div class="statName">Всего</div>
-            </div>
-
-            <div class="stat">
-                <div class="statValue" id="bestStat">0</div>
-                <div class="statName">Рекорд</div>
-            </div>
-
-            <div class="stat">
-                <div class="statValue" id="todayStat">0</div>
-                <div class="statName">Сегодня</div>
-            </div>
-
-        </div>
-
-        <div class="sectionTitle">
-            Выбери упражнение
-        </div>
-
-        <div class="exerciseGrid">
-
-            <button class="exercise" onclick="startWorkout('pushup')">
-                <div class="exerciseIcon">↑</div>
-                <div class="exerciseName">Отжимания</div>
-                <div class="exerciseDescription">
-                    Считаем каждое повторение
-                </div>
-            </button>
-
-            <button class="exercise" onclick="startWorkout('squat')">
-                <div class="exerciseIcon">↓</div>
-                <div class="exerciseName">Приседания</div>
-                <div class="exerciseDescription">
-                    Глубина и полный подъём
-                </div>
-            </button>
-
-            <button class="exercise" onclick="startWorkout('boxing')">
-                <div class="exerciseIcon">✦</div>
-                <div class="exerciseName">Speed Box</div>
-                <div class="exerciseDescription">
-                    Бей как можно быстрее
-                </div>
-            </button>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =========================
-     WORKOUT
-========================= -->
-
-<section id="workout">
+<div id="camera">
 
     <video id="video" autoplay playsinline muted></video>
 
     <canvas id="canvas"></canvas>
 
-    <button class="exitButton" onclick="stopWorkout()">
-        ×
-    </button>
+    <div id="counter">0</div>
 
-    <div class="workoutTop">
-        <div class="counter" id="counter">
-            0
-        </div>
-    </div>
+    <button id="exit">×</button>
 
-    <div class="exerciseLabel" id="exerciseLabel">
-        Отжимания
-    </div>
+</div>
 
-    <div class="cameraHint" id="cameraHint">
-        Встань перед камерой
-    </div>
-
-</section>
-
-
-<!-- =========================
-     RESULT
-========================= -->
-
-<section id="result">
-
-    <div class="resultBox">
-
-        <div class="resultTitle">
-            Готово.
-        </div>
-
-        <div class="resultNumber" id="resultNumber">
-            0
-        </div>
-
-        <div class="resultText">
-            повторений
-        </div>
-
-        <button class="mainButton" onclick="goHome()">
-            Продолжить
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- =========================
-     PROFILE
-========================= -->
-
-<section id="profile">
-
-    <div class="profileInner">
-
-        <button class="backButton" onclick="goHome()">
-            ← Назад
-        </button>
-
-        <div class="profileCard">
-
-            <div class="profileAvatar" id="profileAvatar">
-                М
-            </div>
-
-            <div class="profileName" id="profileName">
-                Матвей
-            </div>
-
-            <div class="profileLevel" id="profileLevel">
-                Новичок
-            </div>
-
-            <button class="resetButton" onclick="resetProfile()">
-                Сбросить профиль
-            </button>
-
-        </div>
-
-    </div>
-
-</section>
-
+<audio id="sound" src="ne_govori.mp3" preload="auto"></audio>
 
 <script>
-/* =====================================================
-   DATA
-===================================================== */
+const start = document.getElementById("start");
+const startButton = document.getElementById("startButton");
 
-let profile = JSON.parse(localStorage.getItem("pushProfile")) || null;
-
-let total = Number(localStorage.getItem("pushTotal") || 0);
-let best = Number(localStorage.getItem("pushBest") || 0);
-let today = Number(localStorage.getItem("pushToday") || 0);
-
-let todayDate = localStorage.getItem("pushDate");
-
-const currentDate = new Date().toDateString();
-
-if (todayDate !== currentDate) {
-    today = 0;
-    localStorage.setItem("pushToday", "0");
-    localStorage.setItem("pushDate", currentDate);
-}
-
-
-/* =====================================================
-   DOM
-===================================================== */
-
-const startScreen = document.getElementById("startScreen");
-const home = document.getElementById("home");
-const workout = document.getElementById("workout");
-const result = document.getElementById("result");
-const profileScreen = document.getElementById("profile");
-
+const camera = document.getElementById("camera");
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const counter = document.getElementById("counter");
-const exerciseLabel = document.getElementById("exerciseLabel");
-const cameraHint = document.getElementById("cameraHint");
+const exitButton = document.getElementById("exit");
+const sound = document.getElementById("sound");
 
-
-/* =====================================================
-   SCREEN CONTROL
-===================================================== */
-
-function hideAll() {
-    startScreen.style.display = "none";
-    home.style.display = "none";
-    workout.style.display = "none";
-    result.style.display = "none";
-    profileScreen.style.display = "none";
-}
-
-
-function showStart() {
-    hideAll();
-    startScreen.style.display = "flex";
-}
-
-
-function goHome() {
-    hideAll();
-    home.style.display = "block";
-    updateHome();
-}
-
-
-/* =====================================================
-   PROFILE
-===================================================== */
-
-function createProfile() {
-
-    const name = document.getElementById("nameInput").value.trim();
-    const level = document.getElementById("levelInput").value;
-
-    if (!name) {
-        document.getElementById("nameInput").focus();
-        return;
-    }
-
-    profile = {
-        name,
-        level
-    };
-
-    localStorage.setItem(
-        "pushProfile",
-        JSON.stringify(profile)
-    );
-
-    goHome();
-}
-
-
-function updateHome() {
-
-    if (!profile) return;
-
-    document.getElementById("greetingName").textContent =
-        profile.name;
-
-    document.getElementById("profileName").textContent =
-        profile.name;
-
-    document.getElementById("profileLevel").textContent =
-        profile.level;
-
-    document.getElementById("profileAvatar").textContent =
-        profile.name.charAt(0).toUpperCase();
-
-    document.getElementById("profileButton").textContent =
-        profile.name.charAt(0).toUpperCase();
-
-    document.getElementById("totalStat").textContent = total;
-    document.getElementById("bestStat").textContent = best;
-    document.getElementById("todayStat").textContent = today;
-}
-
-
-function openProfile() {
-    hideAll();
-    profileScreen.style.display = "block";
-}
-
-
-function resetProfile() {
-
-    if (!confirm("Сбросить профиль и статистику?")) {
-        return;
-    }
-
-    localStorage.removeItem("pushProfile");
-    localStorage.removeItem("pushTotal");
-    localStorage.removeItem("pushBest");
-    localStorage.removeItem("pushToday");
-    localStorage.removeItem("pushDate");
-
-    profile = null;
-    total = 0;
-    best = 0;
-    today = 0;
-
-    showStart();
-}
-
-
-/* =====================================================
-   MEDIAPIPE
-===================================================== */
-
+let stream = null;
 let pose = null;
+let running = false;
+let processing = false;
 
-let cameraStream = null;
-
-let currentExercise = null;
-
-let reps = 0;
-
-let previousState = "UP";
-
-let lastRepTime = 0;
-
-let lastPunch = null;
-let lastPunchTime = 0;
+let calibrated = false;
+let baseY = null;
+let inAir = false;
+let jumps = 0;
+let lastJump = 0;
 
 
-/* =====================================================
-   POSE SETUP
-===================================================== */
+/* =========================
+   MEDIAPIPE
+========================= */
 
 pose = new Pose({
-    locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-    }
+    locateFile: file =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
 });
-
 
 pose.setOptions({
     modelComplexity: 1,
@@ -849,125 +164,9 @@ pose.setOptions({
     minTrackingConfidence: 0.5
 });
 
+pose.onResults(results => {
 
-pose.onResults(onPoseResults);
-
-
-/* =====================================================
-   START WORKOUT
-===================================================== */
-
-async function startWorkout(type) {
-
-    currentExercise = type;
-
-    reps = 0;
-    previousState = "UP";
-    lastRepTime = 0;
-    lastPunch = null;
-    lastPunchTime = 0;
-
-    counter.textContent = "0";
-
-    if (type === "pushup") {
-        exerciseLabel.textContent = "Отжимания";
-        cameraHint.textContent = "Встань лицом к камере";
-    }
-
-    if (type === "squat") {
-        exerciseLabel.textContent = "Приседания";
-        cameraHint.textContent = "Встань полностью в кадр";
-    }
-
-    if (type === "boxing") {
-        exerciseLabel.textContent = "Speed Box";
-        cameraHint.textContent = "Бей поочерёдно левой и правой";
-    }
-
-    hideAll();
-
-    workout.style.display = "block";
-
-    try {
-
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: "user",
-                width: {
-                    ideal: 1280
-                },
-                height: {
-                    ideal: 720
-                }
-            },
-            audio: false
-        });
-
-        video.srcObject = cameraStream;
-
-        await video.play();
-
-        processCamera();
-
-    } catch (error) {
-
-        alert(
-            "Не удалось открыть камеру.\n\n" +
-            "Разреши доступ к камере и попробуй снова."
-        );
-
-        stopWorkout();
-    }
-}
-
-
-/* =====================================================
-   CAMERA LOOP
-===================================================== */
-
-let processing = false;
-
-async function processCamera() {
-
-    if (
-        workout.style.display !== "block" ||
-        !cameraStream
-    ) {
-        return;
-    }
-
-    if (!processing) {
-
-        processing = true;
-
-        try {
-            await pose.send({
-                image: video
-            });
-        } catch (e) {
-            console.log(e);
-        }
-
-        processing = false;
-    }
-
-    requestAnimationFrame(processCamera);
-}
-
-
-/* =====================================================
-   POSE RESULTS
-===================================================== */
-
-function onPoseResults(results) {
-
-    if (workout.style.display !== "block") {
-        return;
-    }
-
-    if (!results.poseLandmarks) {
-        return;
-    }
+    if (!running || !results.poseLandmarks) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -985,7 +184,7 @@ function onPoseResults(results) {
         POSE_CONNECTIONS,
         {
             color: "#42e875",
-            lineWidth: 4
+            lineWidth: 5
         }
     );
 
@@ -996,435 +195,236 @@ function onPoseResults(results) {
             color: "#ffffff",
             fillColor: "#42e875",
             lineWidth: 1,
-            radius: 4
+            radius: 5
         }
     );
 
+    detectJump(results.poseLandmarks);
+});
 
-    if (currentExercise === "pushup") {
-        detectPushups(results.poseLandmarks);
+
+/* =========================
+   START
+========================= */
+
+startButton.onclick = async () => {
+
+    try {
+
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "user",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        });
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        start.style.display = "none";
+        camera.style.display = "block";
+
+        running = true;
+        calibrated = false;
+        baseY = null;
+        inAir = false;
+        jumps = 0;
+
+        counter.textContent = "0";
+
+        processFrame();
+
+    } catch (error) {
+
+        alert("Разреши доступ к камере.");
+
+    }
+};
+
+
+/* =========================
+   CAMERA LOOP
+========================= */
+
+async function processFrame() {
+
+    if (!running) return;
+
+    if (!processing) {
+
+        processing = true;
+
+        try {
+            await pose.send({
+                image: video
+            });
+        } catch (e) {}
+
+        processing = false;
     }
 
-    if (currentExercise === "squat") {
-        detectSquats(results.poseLandmarks);
-    }
-
-    if (currentExercise === "boxing") {
-        detectBoxing(results.poseLandmarks);
-    }
+    requestAnimationFrame(processFrame);
 }
 
 
-/* =====================================================
-   MATH
-===================================================== */
+/* =========================
+   JUMP DETECTION
+========================= */
 
-function distance(a, b) {
+function detectJump(lm) {
 
-    return Math.sqrt(
-        Math.pow(a.x - b.x, 2) +
-        Math.pow(a.y - b.y, 2)
+    const shoulderY =
+        (lm[11].y + lm[12].y) / 2;
+
+    const hipY =
+        (lm[23].y + lm[24].y) / 2;
+
+    const ankleY =
+        (lm[27].y + lm[28].y) / 2;
+
+    const bodyCenter =
+        (shoulderY + hipY) / 2;
+
+    const bodyHeight =
+        Math.abs(ankleY - shoulderY);
+
+    if (bodyHeight < 0.1) return;
+
+    if (baseY === null) {
+        baseY = bodyCenter;
+        return;
+    }
+
+    const rise =
+        baseY - bodyCenter;
+
+    const threshold =
+        bodyHeight * 0.12;
+
+
+    /* КАЛИБРОВКА */
+
+    if (!calibrated) {
+
+        if (rise > threshold) {
+
+            inAir = true;
+
+        } else if (inAir && rise < threshold * 0.35) {
+
+            calibrated = true;
+            inAir = false;
+
+        }
+
+        baseY =
+            baseY * 0.97 +
+            bodyCenter * 0.03;
+
+        return;
+    }
+
+
+    /* РАБОЧИЙ РЕЖИМ */
+
+    if (rise > threshold) {
+
+        inAir = true;
+
+    } else if (
+        inAir &&
+        rise < threshold * 0.35
+    ) {
+
+        inAir = false;
+
+        registerJump();
+    }
+
+
+    baseY =
+        baseY * 0.995 +
+        bodyCenter * 0.005;
+}
+
+
+/* =========================
+   JUMP
+========================= */
+
+function registerJump() {
+
+    const now = performance.now();
+
+    if (now - lastJump < 150) return;
+
+    lastJump = now;
+
+    jumps++;
+
+    counter.textContent = jumps;
+
+    counter.animate(
+        [
+            { transform: "scale(1)" },
+            { transform: "scale(1.35)" },
+            { transform: "scale(1)" }
+        ],
+        {
+            duration: 220,
+            easing: "ease-out"
+        }
     );
+
+    playSound();
 }
 
 
-function angle(a, b, c) {
+/* =========================
+   SOUND
+========================= */
 
-    const ab = {
-        x: a.x - b.x,
-        y: a.y - b.y
-    };
+function playSound() {
 
-    const cb = {
-        x: c.x - b.x,
-        y: c.y - b.y
-    };
+    sound.pause();
+    sound.currentTime = 0;
 
-    const dot =
-        ab.x * cb.x +
-        ab.y * cb.y;
-
-    const magAB =
-        Math.sqrt(
-            ab.x * ab.x +
-            ab.y * ab.y
-        );
-
-    const magCB =
-        Math.sqrt(
-            cb.x * cb.x +
-            cb.y * cb.y
-        );
-
-    if (!magAB || !magCB) {
-        return 180;
-    }
-
-    let cosine =
-        dot / (magAB * magCB);
-
-    cosine = Math.max(
-        -1,
-        Math.min(1, cosine)
-    );
-
-    return Math.acos(cosine) * 180 / Math.PI;
+    sound.play().catch(() => {});
 }
 
 
-/* =====================================================
-   PUSH-UP DETECTION
-===================================================== */
+/* =========================
+   EXIT
+========================= */
 
-function detectPushups(lm) {
+exitButton.onclick = () => {
 
-    const leftShoulder = lm[11];
-    const rightShoulder = lm[12];
+    running = false;
 
-    const leftElbow = lm[13];
-    const rightElbow = lm[14];
+    if (stream) {
 
-    const leftWrist = lm[15];
-    const rightWrist = lm[16];
-
-    if (
-        !leftShoulder ||
-        !rightShoulder ||
-        !leftElbow ||
-        !rightElbow ||
-        !leftWrist ||
-        !rightWrist
-    ) {
-        return;
-    }
-
-    const leftAngle =
-        angle(
-            leftShoulder,
-            leftElbow,
-            leftWrist
+        stream.getTracks().forEach(
+            track => track.stop()
         );
 
-    const rightAngle =
-        angle(
-            rightShoulder,
-            rightElbow,
-            rightWrist
-        );
-
-    const avgAngle =
-        (leftAngle + rightAngle) / 2;
-
-
-    if (avgAngle < 105) {
-
-        previousState = "DOWN";
-
-    } else if (
-        avgAngle > 150 &&
-        previousState === "DOWN"
-    ) {
-
-        countRep(700);
-
-        previousState = "UP";
-    }
-}
-
-
-/* =====================================================
-   SQUAT DETECTION
-===================================================== */
-
-function detectSquats(lm) {
-
-    const leftHip = lm[23];
-    const rightHip = lm[24];
-
-    const leftKnee = lm[25];
-    const rightKnee = lm[26];
-
-    const leftAnkle = lm[27];
-    const rightAnkle = lm[28];
-
-    if (
-        !leftHip ||
-        !rightHip ||
-        !leftKnee ||
-        !rightKnee ||
-        !leftAnkle ||
-        !rightAnkle
-    ) {
-        return;
-    }
-
-    const leftAngle =
-        angle(
-            leftHip,
-            leftKnee,
-            leftAnkle
-        );
-
-    const rightAngle =
-        angle(
-            rightHip,
-            rightKnee,
-            rightAnkle
-        );
-
-    const avgAngle =
-        (leftAngle + rightAngle) / 2;
-
-
-    if (avgAngle < 105) {
-
-        previousState = "DOWN";
-
-    } else if (
-        avgAngle > 155 &&
-        previousState === "DOWN"
-    ) {
-
-        countRep(550);
-
-        previousState = "UP";
-    }
-}
-
-
-/* =====================================================
-   BOXING DETECTION
-===================================================== */
-
-function detectBoxing(lm) {
-
-    const leftShoulder = lm[11];
-    const rightShoulder = lm[12];
-
-    const leftElbow = lm[13];
-    const rightElbow = lm[14];
-
-    const leftWrist = lm[15];
-    const rightWrist = lm[16];
-
-    if (
-        !leftShoulder ||
-        !rightShoulder ||
-        !leftElbow ||
-        !rightElbow ||
-        !leftWrist ||
-        !rightWrist
-    ) {
-        return;
-    }
-
-    const shoulderWidth =
-        distance(
-            leftShoulder,
-            rightShoulder
-        );
-
-    if (shoulderWidth <= 0) {
-        return;
-    }
-
-
-    const leftAngle =
-        angle(
-            leftShoulder,
-            leftElbow,
-            leftWrist
-        );
-
-    const rightAngle =
-        angle(
-            rightShoulder,
-            rightElbow,
-            rightWrist
-        );
-
-
-    const leftExtension =
-        distance(
-            leftShoulder,
-            leftWrist
-        ) / shoulderWidth;
-
-    const rightExtension =
-        distance(
-            rightShoulder,
-            rightWrist
-        ) / shoulderWidth;
-
-
-    const leftPunch =
-        leftAngle > 150 &&
-        leftExtension > 0.72;
-
-    const rightPunch =
-        rightAngle > 150 &&
-        rightExtension > 0.72;
-
-
-    const now = Date.now();
-
-
-    if (
-        leftPunch &&
-        lastPunch !== "left" &&
-        now - lastPunchTime > 230
-    ) {
-
-        reps++;
-        lastPunch = "left";
-        lastPunchTime = now;
-
-        updateCounter();
-
-    } else if (
-        rightPunch &&
-        lastPunch !== "right" &&
-        now - lastPunchTime > 230
-    ) {
-
-        reps++;
-        lastPunch = "right";
-        lastPunchTime = now;
-
-        updateCounter();
-    }
-}
-
-
-/* =====================================================
-   REP COUNTER
-===================================================== */
-
-function countRep(cooldown) {
-
-    const now = Date.now();
-
-    if (
-        now - lastRepTime < cooldown
-    ) {
-        return;
-    }
-
-    lastRepTime = now;
-
-    reps++;
-
-    updateCounter();
-}
-
-
-function updateCounter() {
-
-    counter.textContent = reps;
-
-    counter.classList.remove("pop");
-
-    void counter.offsetWidth;
-
-    counter.classList.add("pop");
-}
-
-
-/* =====================================================
-   STOP WORKOUT
-===================================================== */
-
-function stopWorkout() {
-
-    if (cameraStream) {
-
-        cameraStream
-            .getTracks()
-            .forEach(track => track.stop());
-
-        cameraStream = null;
+        stream = null;
     }
 
     video.srcObject = null;
 
-    workout.style.display = "none";
+    camera.style.display = "none";
+    start.style.display = "flex";
 
-    showResult();
-}
-
-
-/* =====================================================
-   RESULT
-===================================================== */
-
-function showResult() {
-
-    total += reps;
-    today += reps;
-
-    if (reps > best) {
-        best = reps;
-    }
-
-    localStorage.setItem(
-        "pushTotal",
-        total
-    );
-
-    localStorage.setItem(
-        "pushToday",
-        today
-    );
-
-    localStorage.setItem(
-        "pushBest",
-        best
-    );
-
-    localStorage.setItem(
-        "pushDate",
-        new Date().toDateString()
-    );
-
-    document.getElementById("resultNumber")
-        .textContent = reps;
-
-    hideAll();
-
-    result.style.display = "flex";
-}
-
-
-/* =====================================================
-   INITIALIZATION
-===================================================== */
-
-if (profile) {
-
-    updateHome();
-    goHome();
-
-} else {
-
-    showStart();
-}
-
-
-/* =====================================================
-   ENTER KEY
-===================================================== */
-
-document
-    .getElementById("nameInput")
-    .addEventListener("keydown", function(e) {
-
-        if (e.key === "Enter") {
-            createProfile();
-        }
-
-    });
+    calibrated = false;
+    baseY = null;
+    inAir = false;
+    jumps = 0;
+    counter.textContent = "0";
+};
 </script>
 
 </body>
 </html>
-```
