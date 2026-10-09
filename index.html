@@ -85,20 +85,6 @@ html, body {
     z-index: 10;
 }
 
-#instruction {
-    position: absolute;
-    left: 50%;
-    bottom: 35px;
-    transform: translateX(-50%);
-    padding: 12px 20px;
-    border-radius: 999px;
-    background: rgba(0,0,0,.6);
-    color: white;
-    font-size: 16px;
-    z-index: 15;
-    white-space: nowrap;
-}
-
 #exit {
     position: absolute;
     top: 20px;
@@ -129,10 +115,6 @@ html, body {
 
     <div id="counter">0</div>
 
-    <div id="instruction">
-        Сделай небольшой прыжок
-    </div>
-
     <button id="exit">×</button>
 
 </div>
@@ -140,7 +122,6 @@ html, body {
 <audio id="sound" src="ne_govori.mp3" preload="auto"></audio>
 
 <script>
-
 const start = document.getElementById("start");
 const startButton = document.getElementById("startButton");
 
@@ -150,7 +131,6 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const counter = document.getElementById("counter");
-const instruction = document.getElementById("instruction");
 const exitButton = document.getElementById("exit");
 const sound = document.getElementById("sound");
 
@@ -162,7 +142,6 @@ let processing = false;
 let calibrated = false;
 let baseY = null;
 let inAir = false;
-
 let jumps = 0;
 let lastJump = 0;
 
@@ -255,7 +234,6 @@ startButton.onclick = async () => {
         jumps = 0;
 
         counter.textContent = "0";
-        instruction.textContent = "Сделай небольшой прыжок";
 
         processFrame();
 
@@ -323,18 +301,11 @@ function detectJump(lm) {
     const rise =
         baseY - bodyCenter;
 
-    /*
-       НИЗКИЙ ПОРОГ:
-       достаточно небольшого прыжка.
-    */
-
     const threshold =
-        bodyHeight * 0.055;
+        bodyHeight * 0.12;
 
 
-    /* =========================
-       КАЛИБРОВКА
-    ========================= */
+    /* КАЛИБРОВКА */
 
     if (!calibrated) {
 
@@ -342,21 +313,11 @@ function detectJump(lm) {
 
             inAir = true;
 
-            /*
-               Калибровочный прыжок
-               тоже происходит сразу,
-               но звук не запускаем.
-            */
-
-        } else if (
-            inAir &&
-            rise < threshold * 0.35
-        ) {
+        } else if (inAir && rise < threshold * 0.35) {
 
             calibrated = true;
             inAir = false;
 
-            instruction.style.display = "none";
         }
 
         baseY =
@@ -367,22 +328,11 @@ function detectJump(lm) {
     }
 
 
-    /* =========================
-       РАБОЧИЙ РЕЖИМ
-    ========================= */
+    /* РАБОЧИЙ РЕЖИМ */
 
     if (rise > threshold) {
 
-        /*
-           СРАЗУ при начале прыжка.
-        */
-
-        if (!inAir) {
-
-            inAir = true;
-
-            registerJump();
-        }
+        inAir = true;
 
     } else if (
         inAir &&
@@ -390,6 +340,8 @@ function detectJump(lm) {
     ) {
 
         inAir = false;
+
+        registerJump();
     }
 
 
@@ -466,16 +418,12 @@ exitButton.onclick = () => {
     camera.style.display = "none";
     start.style.display = "flex";
 
-    instruction.style.display = "block";
-
     calibrated = false;
     baseY = null;
     inAir = false;
     jumps = 0;
-
     counter.textContent = "0";
 };
-
 </script>
 
 </body>
