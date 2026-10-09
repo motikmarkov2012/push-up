@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>PUSH.</title>
 
@@ -17,565 +16,160 @@
     padding: 0;
 }
 
-body {
-    background: #070907;
-    color: white;
-    font-family: Arial, sans-serif;
+html, body {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+    background: #000;
 }
 
-/* =====================
-   START
-===================== */
-
 #start {
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #000;
 }
 
-.startBox {
-    width: min(90%, 380px);
-    text-align: center;
-}
-
-.logo {
-    font-size: 58px;
-    font-weight: 900;
-    letter-spacing: -4px;
-    margin-bottom: 18px;
-}
-
-.subtitle {
-    color: #aab4ac;
-    margin-bottom: 35px;
-}
-
-.startButton {
-    width: 100%;
-    height: 60px;
-    border: 0;
+#startButton {
+    width: 220px;
+    height: 64px;
+    border: none;
     border-radius: 18px;
     background: #42e875;
     color: #061008;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 800;
     cursor: pointer;
 }
 
-.startButton:active {
-    transform: scale(.98);
+#startButton:active {
+    transform: scale(.97);
 }
 
-/* =====================
-   CAMERA
-===================== */
-
-#cameraScreen {
+#camera {
     display: none;
     position: fixed;
     inset: 0;
-    background: black;
+    background: #000;
 }
 
 #video {
     position: absolute;
     inset: 0;
-
     width: 100%;
     height: 100%;
-
     object-fit: cover;
-
     transform: scaleX(-1);
 }
 
 #canvas {
     position: absolute;
     inset: 0;
-
     width: 100%;
     height: 100%;
-
     transform: scaleX(-1);
 }
 
-/* =====================
-   UI
-===================== */
-
-.top {
+#counter {
     position: absolute;
     top: 25px;
     left: 0;
     right: 0;
-
     text-align: center;
-
-    z-index: 10;
-
-    pointer-events: none;
-}
-
-.status {
-    display: inline-block;
-
-    padding: 12px 20px;
-
-    border-radius: 999px;
-
-    background: rgba(0,0,0,.55);
-    backdrop-filter: blur(10px);
-
-    font-size: 16px;
-}
-
-.jumpCounter {
-    margin-top: 15px;
-
-    font-size: 55px;
+    color: white;
+    font-size: 52px;
     font-weight: 900;
-
-    text-shadow: 0 3px 15px black;
+    text-shadow: 0 3px 15px #000;
+    z-index: 10;
 }
 
-.flash {
+#exit {
     position: absolute;
-    inset: 0;
-
-    background: rgba(66,232,117,.12);
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    z-index: 5;
-}
-
-.flash.active {
-    animation: flash .15s ease;
-}
-
-@keyframes flash {
-    0% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
-    }
-}
-
-.exit {
-    position: absolute;
-
     top: 20px;
     left: 20px;
-
     width: 45px;
     height: 45px;
-
+    border: 1px solid rgba(255,255,255,.25);
     border-radius: 50%;
-
-    border: 1px solid rgba(255,255,255,.2);
-
     background: rgba(0,0,0,.5);
-
     color: white;
-
-    font-size: 22px;
-
+    font-size: 24px;
     z-index: 20;
-}
-
-/* =====================
-   CALIBRATION
-===================== */
-
-#calibration {
-    position: absolute;
-    inset: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    z-index: 15;
-
-    pointer-events: none;
-}
-
-.calibrationBox {
-    width: min(90%, 400px);
-
-    text-align: center;
-
-    padding: 25px;
-
-    border-radius: 25px;
-
-    background: rgba(0,0,0,.7);
-
-    backdrop-filter: blur(15px);
-}
-
-.calibrationTitle {
-    font-size: 25px;
-    font-weight: 800;
-    margin-bottom: 10px;
-}
-
-.calibrationText {
-    color: #aeb8b0;
-    line-height: 1.4;
 }
 </style>
 </head>
 
 <body>
 
-<!-- =====================
-     START
-===================== -->
-
 <div id="start">
-
-    <div class="startBox">
-
-        <div class="logo">
-            PUSH.
-        </div>
-
-        <div class="subtitle">
-            Прыгни — и слушай.
-        </div>
-
-        <button class="startButton"
-                onclick="startCamera()">
-            Запустить
-        </button>
-
-    </div>
-
+    <button id="startButton">Запустить</button>
 </div>
 
+<div id="camera">
 
-<!-- =====================
-     CAMERA
-===================== -->
-
-<div id="cameraScreen">
-
-    <video id="video"
-           autoplay
-           playsinline
-           muted></video>
+    <video id="video" autoplay playsinline muted></video>
 
     <canvas id="canvas"></canvas>
 
-    <div class="flash" id="flash"></div>
+    <div id="counter">0</div>
 
-    <button class="exit"
-            onclick="stopCamera()">
-        ×
-    </button>
-
-    <div class="top">
-
-        <div class="status"
-             id="status">
-            Подготовка...
-        </div>
-
-        <div class="jumpCounter"
-             id="jumpCounter">
-            0
-        </div>
-
-    </div>
-
-
-    <div id="calibration">
-
-        <div class="calibrationBox">
-
-            <div class="calibrationTitle">
-                Калибровка
-            </div>
-
-            <div class="calibrationText">
-                Подпрыгни пару раз.<br>
-                После этого можно начинать.
-            </div>
-
-        </div>
-
-    </div>
+    <button id="exit">×</button>
 
 </div>
 
-
-<!-- =====================
-     SOUND
-===================== -->
-
-<audio id="sound"
-       src="ne_govori.mp3"
-       preload="auto"></audio>
-
+<audio id="sound" src="ne_govori.mp3" preload="auto"></audio>
 
 <script>
-
-/* =====================================================
-   ELEMENTS
-===================================================== */
-
 const start = document.getElementById("start");
+const startButton = document.getElementById("startButton");
 
-const cameraScreen =
-    document.getElementById("cameraScreen");
+const camera = document.getElementById("camera");
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-const video =
-    document.getElementById("video");
-
-const canvas =
-    document.getElementById("canvas");
-
-const ctx =
-    canvas.getContext("2d");
-
-const status =
-    document.getElementById("status");
-
-const jumpCounter =
-    document.getElementById("jumpCounter");
-
-const calibration =
-    document.getElementById("calibration");
-
-const sound =
-    document.getElementById("sound");
-
-const flash =
-    document.getElementById("flash");
-
-
-/* =====================================================
-   VARIABLES
-===================================================== */
+const counter = document.getElementById("counter");
+const exitButton = document.getElementById("exit");
+const sound = document.getElementById("sound");
 
 let stream = null;
-
 let pose = null;
-
+let running = false;
 let processing = false;
 
-let running = false;
-
 let calibrated = false;
-
-let jumps = 0;
-
-
-/*
-    Значение высоты тела,
-    когда человек стоит.
-
-    Используется как базовая линия.
-*/
-
 let baseY = null;
-
-
-/*
-    Состояние прыжка:
-
-    false = на земле
-    true  = в воздухе
-*/
-
 let inAir = false;
+let jumps = 0;
+let lastJump = 0;
 
 
-/*
-    Защита от случайных срабатываний.
-*/
-
-let lastJumpTime = 0;
-
-
-/* =====================================================
+/* =========================
    MEDIAPIPE
-===================================================== */
+========================= */
 
 pose = new Pose({
-
-    locateFile: function(file) {
-
-        return
-        `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-
-    }
-
+    locateFile: file =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
 });
-
 
 pose.setOptions({
-
     modelComplexity: 1,
-
     smoothLandmarks: true,
-
     enableSegmentation: false,
-
     smoothSegmentation: false,
-
     minDetectionConfidence: 0.5,
-
     minTrackingConfidence: 0.5
-
 });
 
+pose.onResults(results => {
 
-pose.onResults(onResults);
+    if (!running || !results.poseLandmarks) return;
 
-
-/* =====================================================
-   START CAMERA
-===================================================== */
-
-async function startCamera() {
-
-    try {
-
-        stream =
-            await navigator.mediaDevices.getUserMedia({
-
-                video: {
-
-                    facingMode: "user",
-
-                    width: {
-                        ideal: 1280
-                    },
-
-                    height: {
-                        ideal: 720
-                    }
-
-                },
-
-                audio: false
-
-            });
-
-
-        video.srcObject = stream;
-
-        await video.play();
-
-
-        start.style.display = "none";
-
-        cameraScreen.style.display = "block";
-
-
-        running = true;
-
-        calibrated = false;
-
-        inAir = false;
-
-        baseY = null;
-
-        jumps = 0;
-
-        jumpCounter.textContent = "0";
-
-
-        status.textContent =
-            "Подпрыгни пару раз";
-
-
-        calibration.style.display =
-            "flex";
-
-
-        processFrame();
-
-
-    } catch (error) {
-
-        alert(
-            "Не получилось открыть камеру.\n\n" +
-            "Разреши доступ к камере."
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   CAMERA LOOP
-===================================================== */
-
-async function processFrame() {
-
-    if (!running) {
-        return;
-    }
-
-
-    if (!processing) {
-
-        processing = true;
-
-        try {
-
-            await pose.send({
-                image: video
-            });
-
-        } catch (error) {
-
-            console.log(error);
-
-        }
-
-        processing = false;
-
-    }
-
-
-    requestAnimationFrame(processFrame);
-
-}
-
-
-/* =====================================================
-   POSE RESULTS
-===================================================== */
-
-function onResults(results) {
-
-    if (!running) {
-        return;
-    }
-
-
-    if (!results.poseLandmarks) {
-        return;
-    }
-
-
-    canvas.width =
-        video.videoWidth;
-
-    canvas.height =
-        video.videoHeight;
-
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
     ctx.clearRect(
         0,
@@ -584,470 +178,252 @@ function onResults(results) {
         canvas.height
     );
 
-
-    /*
-        Рисуем скелет.
-    */
-
     drawConnectors(
-
         ctx,
-
         results.poseLandmarks,
-
         POSE_CONNECTIONS,
-
         {
-
             color: "#42e875",
-
             lineWidth: 5
-
         }
-
     );
-
 
     drawLandmarks(
-
         ctx,
-
         results.poseLandmarks,
-
         {
-
             color: "#ffffff",
-
             fillColor: "#42e875",
-
             lineWidth: 1,
-
             radius: 5
-
         }
-
     );
 
+    detectJump(results.poseLandmarks);
+});
 
-    detectJump(
-        results.poseLandmarks
-    );
 
+/* =========================
+   START
+========================= */
+
+startButton.onclick = async () => {
+
+    try {
+
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "user",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        });
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        start.style.display = "none";
+        camera.style.display = "block";
+
+        running = true;
+        calibrated = false;
+        baseY = null;
+        inAir = false;
+        jumps = 0;
+
+        counter.textContent = "0";
+
+        processFrame();
+
+    } catch (error) {
+
+        alert("Разреши доступ к камере.");
+
+    }
+};
+
+
+/* =========================
+   CAMERA LOOP
+========================= */
+
+async function processFrame() {
+
+    if (!running) return;
+
+    if (!processing) {
+
+        processing = true;
+
+        try {
+            await pose.send({
+                image: video
+            });
+        } catch (e) {}
+
+        processing = false;
+    }
+
+    requestAnimationFrame(processFrame);
 }
 
 
-/* =====================================================
+/* =========================
    JUMP DETECTION
-===================================================== */
+========================= */
 
 function detectJump(lm) {
 
-    /*
-        Берём плечи и таз.
-
-        Средняя точка тела значительно
-        надёжнее одной точки.
-    */
-
-    const leftShoulder = lm[11];
-    const rightShoulder = lm[12];
-
-    const leftHip = lm[23];
-    const rightHip = lm[24];
-
-    const leftAnkle = lm[27];
-    const rightAnkle = lm[28];
-
-
-    if (
-        !leftShoulder ||
-        !rightShoulder ||
-        !leftHip ||
-        !rightHip ||
-        !leftAnkle ||
-        !rightAnkle
-    ) {
-        return;
-    }
-
-
-    /*
-        Центр таза.
-    */
+    const shoulderY =
+        (lm[11].y + lm[12].y) / 2;
 
     const hipY =
-        (leftHip.y + rightHip.y) / 2;
-
-
-    /*
-        Высота ступней.
-    */
+        (lm[23].y + lm[24].y) / 2;
 
     const ankleY =
-        (leftAnkle.y + rightAnkle.y) / 2;
-
-
-    /*
-        Высота плеч.
-    */
-
-    const shoulderY =
-        (leftShoulder.y +
-         rightShoulder.y) / 2;
-
-
-    /*
-        Размер тела.
-    */
-
-    const bodyHeight =
-        Math.abs(
-            ankleY - shoulderY
-        );
-
-
-    if (bodyHeight < 0.1) {
-        return;
-    }
-
-
-    /*
-        Положение тела относительно ног.
-
-        Когда человек прыгает,
-        таз и плечи поднимаются
-        относительно положения ног.
-    */
+        (lm[27].y + lm[28].y) / 2;
 
     const bodyCenter =
         (shoulderY + hipY) / 2;
 
+    const bodyHeight =
+        Math.abs(ankleY - shoulderY);
 
-    /*
-        ============================
-        КАЛИБРОВКА
-        ============================
-    */
+    if (bodyHeight < 0.1) return;
+
+    if (baseY === null) {
+        baseY = bodyCenter;
+        return;
+    }
+
+    const rise =
+        baseY - bodyCenter;
+
+    const threshold =
+        bodyHeight * 0.12;
+
+
+    /* КАЛИБРОВКА */
 
     if (!calibrated) {
 
-        if (baseY === null) {
+        if (rise > threshold) {
 
-            baseY = bodyCenter;
+            inAir = true;
 
-            return;
+        } else if (inAir && rise < threshold * 0.35) {
 
-        }
-
-
-        /*
-            Сколько человек поднялся.
-
-            0.10 = примерно 10%
-            высоты тела.
-        */
-
-        const rise =
-            baseY - bodyCenter;
-
-
-        /*
-            Если человек поднялся
-            достаточно высоко — прыжок.
-        */
-
-        if (rise > bodyHeight * 0.10) {
-
-            if (!inAir) {
-
-                inAir = true;
-
-            }
-
-        } else {
-
-            /*
-                Вернулся вниз после прыжка.
-            */
-
-            if (inAir) {
-
-                calibrated = true;
-
-                inAir = false;
-
-                calibration.style.display =
-                    "none";
-
-                status.textContent =
-                    "Готово";
-
-                /*
-                    Первый калибровочный
-                    прыжок НЕ считается.
-                */
-
-            }
+            calibrated = true;
+            inAir = false;
 
         }
-
-
-        /*
-            Медленно обновляем
-            базовое положение.
-        */
 
         baseY =
             baseY * 0.97 +
             bodyCenter * 0.03;
 
-
         return;
     }
 
 
-    /*
-        ============================
-        РАБОЧИЙ РЕЖИМ
-        ============================
-    */
+    /* РАБОЧИЙ РЕЖИМ */
 
-    const rise =
-        baseY - bodyCenter;
+    if (rise > threshold) {
 
+        inAir = true;
 
-    /*
-        Порог прыжка.
-
-        Можно изменить:
-
-        0.10 = чувствительнее
-        0.15 = строже
-        0.20 = очень строго
-    */
-
-    const jumpThreshold =
-        bodyHeight * 0.12;
-
-
-    /*
-        В воздухе.
-    */
-
-    if (rise > jumpThreshold) {
-
-        if (!inAir) {
-
-            inAir = true;
-
-        }
-
-    }
-
-
-    /*
-        Вернулся вниз.
-    */
-
-    else if (
-        rise < jumpThreshold * 0.35
+    } else if (
+        inAir &&
+        rise < threshold * 0.35
     ) {
 
-        if (inAir) {
+        inAir = false;
 
-            inAir = false;
-
-            registerJump();
-
-        }
-
+        registerJump();
     }
 
-
-    /*
-        Очень медленно подстраиваем
-        базовую высоту.
-
-        Это позволяет системе
-        работать даже если человек
-        немного двигается по комнате.
-    */
 
     baseY =
         baseY * 0.995 +
         bodyCenter * 0.005;
-
 }
 
 
-/* =====================================================
-   REGISTER JUMP
-===================================================== */
+/* =========================
+   JUMP
+========================= */
 
 function registerJump() {
 
-    const now = Date.now();
+    const now = performance.now();
 
+    if (now - lastJump < 150) return;
 
-    /*
-        Если два события пришли
-        практически одновременно —
-        игнорируем второе.
-    */
-
-    if (
-        now - lastJumpTime < 150
-    ) {
-        return;
-    }
-
-
-    lastJumpTime = now;
-
+    lastJump = now;
 
     jumps++;
 
+    counter.textContent = jumps;
 
-    jumpCounter.textContent =
-        jumps;
-
-
-    /*
-        Анимация счётчика.
-    */
-
-    jumpCounter.animate(
-
+    counter.animate(
         [
-
-            {
-                transform: "scale(1)"
-            },
-
-            {
-                transform: "scale(1.35)"
-            },
-
-            {
-                transform: "scale(1)"
-            }
-
+            { transform: "scale(1)" },
+            { transform: "scale(1.35)" },
+            { transform: "scale(1)" }
         ],
-
         {
-
             duration: 220,
-
             easing: "ease-out"
-
         }
-
     );
 
-
-    /*
-        Короткая вспышка.
-    */
-
-    flash.classList.remove("active");
-
-    void flash.offsetWidth;
-
-    flash.classList.add("active");
-
-
-    /*
-        ГЛАВНОЕ:
-        звук запускается сразу после
-        распознавания прыжка.
-    */
-
     playSound();
-
 }
 
 
-/* =====================================================
+/* =========================
    SOUND
-===================================================== */
+========================= */
 
 function playSound() {
 
-    /*
-        Перезапускаем звук с начала.
-
-        Поэтому каждый новый прыжок
-        начинает "Не говори." заново.
-    */
-
     sound.pause();
-
     sound.currentTime = 0;
 
-
-    sound.play().catch(error => {
-
-        console.log(
-            "Браузер заблокировал звук:",
-            error
-        );
-
-    });
-
+    sound.play().catch(() => {});
 }
 
 
-/* =====================================================
-   STOP
-===================================================== */
+/* =========================
+   EXIT
+========================= */
 
-function stopCamera() {
+exitButton.onclick = () => {
 
     running = false;
 
-
     if (stream) {
 
-        stream
-            .getTracks()
-            .forEach(
-                track => track.stop()
-            );
+        stream.getTracks().forEach(
+            track => track.stop()
+        );
 
         stream = null;
-
     }
-
 
     video.srcObject = null;
 
-
-    cameraScreen.style.display =
-        "none";
-
-    start.style.display =
-        "flex";
-
-
-    calibration.style.display =
-        "flex";
-
-    status.textContent =
-        "Подпрыгни пару раз";
-
-    jumps = 0;
-
-    jumpCounter.textContent =
-        "0";
-
-    baseY = null;
-
-    inAir = false;
+    camera.style.display = "none";
+    start.style.display = "flex";
 
     calibrated = false;
-
-}
-
+    baseY = null;
+    inAir = false;
+    jumps = 0;
+    counter.textContent = "0";
+};
 </script>
 
 </body>
